@@ -63,7 +63,7 @@ conversation remotely? If Client A speaks at 11:01 am, and client B does so at
 
 ## Architecture Diagram
 
-[!Diagram][https://github.com/oplS17projects/Hermes/blob/master/architecture_diagram.png]
+[!Diagram](https://github.com/oplS17projects/Hermes/blob/master/architecture_diagram.png)
 
 
 ## Schedule
