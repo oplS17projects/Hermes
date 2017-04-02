@@ -1,56 +1,46 @@
 # Hermes
 
 ### Statement
-Describe your project. Why is it interesting? Why is it interesting to you personally? What do you hope to learn? 
 Hermes is a multi-client chat program akin to IRC written in  Racket. Building
 Hermes is interesting as it exposes us to various design problems namely networking,
 synchronization, scheduling, and GUI design.
 
 ### Analysis
-Explain what approaches from class you will bring to bear on the project.
+Will you use data abstraction? How?
+> TCP communication will be abstracted away so will only deal with Hermes
+> definition of a message.
+> We will try to encrypt the messages passed around. The encryption will be
+> abstracted away so we only have to think about it once during implementation
 
-Be explicit about the techiques from the class that you will use. For example:
+Will you use recursion? How?
+> The  server will continually loop waiting for connections from clients.
+> The Gui will continually loop to handle input with the user, and to and fro
+> Hermes.
 
-- Will you use data abstraction? How?
-- Will you use recursion? How?
-- Will you use map/filter/reduce? How? 
-- Will you use object-orientation? How?
-- Will you use functional approaches to processing your data? How?
-- Will you use state-modification approaches? How? (If so, this should be encapsulated within objects. `set!` pretty much should only exist inside an object.)
-- Will you build an expression evaluator, like we did in the symbolic differentatior and the metacircular evaluator?
-- Will you use lazy evaluation approaches?
+Will you use map/filter/reduce? How? 
+> Map will be used for dealing editor area of clients.
 
-The idea here is to identify what ideas from the class you will use in carrying out your project. 
+Will you use object-orientation? How?
+> Keeping account of the number of clients will require an object of some sort.
+> With procedures to increment and decrement the number of users
 
-**Your project will be graded, in part, by the extent to which you adopt approaches from the course into your implementation, _and_ your discussion about this.**
+Will you use functional approaches to processing your data? How?
+> The communication part of Hermes is over tcp which uses a lot of functional
+> approaches e.g. you start a listener which you can then pass to tcp accept.
+> The result of tcp accept are two pairs of ports which we can then bind to some
+> variables. 
 
-### External Technologies
-As stated previously Hermes will be designed using a client/server model. The
-server instance could be running locally or on a remote machine. The same
-applies for clients. We can think of the clients as connecting to an external
-system, Hermes!
-* authentication via databases
-You are encouraged to develop a project that connects to external systems. For example, this includes systems that:
+Will you use state-modification approaches? How? (If so, this should be encapsulated within objects. `set!` pretty much should only exist inside an object.)
+> State-modification will be used e.g. keeping count of logged in users requires
+> state modification via set! to maintain the true user account
 
-- retrieve information or publish data to the web
-- generate or process sound
-- control robots or other physical systems
-- interact with databases
+Will you build an expression evaluator, like we did in the symbolic differentatior and the metacircular evaluator?
+> Users will type their input into a text field from the GUI. We will retrieve
+> the command and evaluate it to see if its a message, or a command to change
+> GUI state. We will do something that resembles the metacircular evaluator.
 
-If your project will do anything in this category (not only the things listed above!), include this section and discuss.
+Will you use lazy evaluation approaches?
 
-### Data Sets or other Source Materials
-We won't need to download any data sets. An artificial dataset will be generated
-consisting of conversations between clients, plus any additional commands that aren't
-messages for testing. 
-
-If you will be working with existing data, where will you get those data from? (Dowload from a website? Access in a database? Create in a simulation you will build? ...)
-
-How will you convert your data into a form usable for your project?  
-
-If you are pulling data from somewhere, actually go download it and look at it before writing the proposal. Explain in some detail what your plan is for accomplishing the necessary processing.
-
-If you are using some other starting materials, explain what they are. Basically: anything you plan to use that isn't code.
 
 ### Deliverable and Demonstration
 There are two big deliverables for this project. Code for the server(Hermes,
@@ -63,21 +53,13 @@ the remote machine to see the server running. Since Hermes is a multichat anyone
 can join in the demonstration by connecting their computers to the remote
 machine!
 
-Explain exactly what you'll have at the end. What will it be able to do at the live demo?
-
-What exactly will you produce at the end of the project? A piece of software, yes, but what will it do? Here are some questions to think about (and answer depending on your application).
-
-Will it run on some data, like batch mode? Will you present some analytical results of the processing? How can it be re-run on different source data?
-
-Will it be interactive? Can you show it working? This project involves a live demo, so interactivity is good.
 
 
 ### Evaluation of Results
 Evaluating Hermes is very simple. Can at least two clients hold a meaningful
-conversation remotely?...
+conversation remotely? If Client A speaks at 11:01 am, and client B does so at
+11:01 plus a few seconds, Hermes has to convey  this state correctly.
 
-How will you know if you are successful? 
-If you include some kind of _quantitative analysis,_ that would be good.
 
 ## Architecture Diagram
 Upload the architecture diagram you made for your slide presentation to your repository, and include it in-line here.
