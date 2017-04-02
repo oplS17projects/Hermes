@@ -39,8 +39,6 @@ Will you build an expression evaluator, like we did in the symbolic differentati
 > the command and evaluate it to see if its a message, or a command to change
 > GUI state. We will do something that resembles the metacircular evaluator.
 
-Will you use lazy evaluation approaches?
-
 
 ### Deliverable and Demonstration
 There are two big deliverables for this project. Code for the server(Hermes,
