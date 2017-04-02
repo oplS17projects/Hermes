@@ -62,9 +62,9 @@ conversation remotely? If Client A speaks at 11:01 am, and client B does so at
 
 
 ## Architecture Diagram
-Upload the architecture diagram you made for your slide presentation to your repository, and include it in-line here.
 
-Create several paragraphs of narrative to explain the pieces and how they interoperate.
+[!Diagram][https://github.com/oplS17projects/Hermes/blob/master/architecture_diagram.png]
+
 
 ## Schedule
 Explain how you will go from proposal to finished product. 
