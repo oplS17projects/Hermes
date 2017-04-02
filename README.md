@@ -65,32 +65,25 @@ conversation remotely? If Client A speaks at 11:01 am, and client B does so at
 
 
 ## Schedule
-Explain how you will go from proposal to finished product. 
+The first step in out project will be to setup a system to get data from one machine to another. What data exactly isn't directly important and the other machine doesn't really need to display it in a pretty manner, it just needs to relay that it has recieved the correct information.
 
-There are three deliverable milestones to explicitly define, below.
+Next we need to create a user interface that looks nice. Some way to control the connection and display information in a convient and readable format.
 
-The nature of deliverables depend on your project, but may include things like processed data ready for import, core algorithms implemented, interface design prototyped, etc. 
-
-You will be expected to turn in code, documentation, and data (as appropriate) at each of these stages.
-
-Write concrete steps for your schedule to move from concept to working system. 
+After we have finished the user interface and connecting the machines, we will need to merge them together and begin expanding the utility if time permits.
 
 ### First Milestone (Sun Apr 9)
-Which portion of the work will be completed (and committed to Github) by this day? 
+Get two different machines to relay information.
 
 ### Second Milestone (Sun Apr 16)
-Which portion of the work will be completed (and committed to Github) by this day?  
+Get a GUI that looks professional and uses the correct format
 
 ### Public Presentation (Mon Apr 24, Wed Apr 26, or Fri Apr 28 [your date to be determined later])
-What additionally will be completed before the public presentation?
+Merging the GUI and information relay together into one program. If time permits we also plan on adding additional features.
 
 ## Group Responsibilities
-Here each group member gets a section where they, as an individual, detail what they are responsible for in this project. Each group member writes their own Responsibility section. Include the milestones and final deliverable.
-
-Please use Github properly: each individual must make the edits to this file representing their own section of work.
 
 ### Douglas Richardson @Doug-Richardson
-will write the....
+Will write the GUI
 
 ### Ibrahim Mkusa @iskm
-will work on...
+Will write the code
