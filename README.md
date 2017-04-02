@@ -6,38 +6,38 @@ Hermes is interesting as it exposes us to various design problems namely network
 synchronization, scheduling, and GUI design.
 
 ### Analysis
-Will you use data abstraction? How?
-> TCP communication will be abstracted away so will only deal with Hermes
-> definition of a message.
-> We will try to encrypt the messages passed around. The encryption will be
-> abstracted away so we only have to think about it once during implementation
+> Will you use data abstraction? How?
+TCP communication will be abstracted away so will only deal with Hermes
+definition of a message.
+We will try to encrypt the messages passed around. The encryption will be
+abstracted away so we only have to think about it once during implementation
 
-Will you use recursion? How?
-> The  server will continually loop waiting for connections from clients.
-> The Gui will continually loop to handle input with the user, and to and fro
-> Hermes.
+> Will you use recursion? How?
+The  server will continually loop waiting for connections from clients.
+The Gui will continually loop to handle input with the user, and to and fro
+Hermes.
 
-Will you use map/filter/reduce? How? 
-> Map will be used for dealing editor area of clients.
+> Will you use map/filter/reduce? How? 
+Map will be used for dealing editor area of clients.
 
-Will you use object-orientation? How?
-> Keeping account of the number of clients will require an object of some sort.
-> With procedures to increment and decrement the number of users
+> Will you use object-orientation? How?
+Keeping account of the number of clients will require an object of some sort.
+With procedures to increment and decrement the number of users
 
-Will you use functional approaches to processing your data? How?
-> The communication part of Hermes is over tcp which uses a lot of functional
-> approaches e.g. you start a listener which you can then pass to tcp accept.
-> The result of tcp accept are two pairs of ports which we can then bind to some
-> variables. 
+> Will you use functional approaches to processing your data? How?
+The communication part of Hermes is over tcp which uses a lot of functional
+approaches e.g. you start a listener which you can then pass to tcp accept.
+The result of tcp accept are two pairs of ports which we can then bind to some
+variables. 
 
-Will you use state-modification approaches? How? (If so, this should be encapsulated within objects. `set!` pretty much should only exist inside an object.)
-> State-modification will be used e.g. keeping count of logged in users requires
-> state modification via set! to maintain the true user account
+> Will you use state-modification approaches? How? (If so, this should be encapsulated within objects. `set!` pretty much should only exist inside an object.)
+State-modification will be used e.g. keeping count of logged in users requires
+state modification via set! to maintain the true user account
 
-Will you build an expression evaluator, like we did in the symbolic differentatior and the metacircular evaluator?
-> Users will type their input into a text field from the GUI. We will retrieve
-> the command and evaluate it to see if its a message, or a command to change
-> GUI state. We will do something that resembles the metacircular evaluator.
+> Will you build an expression evaluator, like we did in the symbolic differentatior and the metacircular evaluator?
+Users will type their input into a text field from the GUI. We will retrieve
+the command and evaluate it to see if its a message, or a command to change
+GUI state. We will do something that resembles the metacircular evaluator.
 
 
 ### Deliverable and Demonstration
