@@ -94,7 +94,11 @@ Merging the GUI and information relay together into one program. If time permits
 ## Group Responsibilities
 
 ### Douglas Richardson @Doug-Richardson
-Will write the GUI
+Will write the GUI code. This should allow the user to access different
+aspects of our program in a clean easy to use interface. Most of
+how the program responds to user input will be filtered through the gui.
+If time permits I will also be writing code to encrypt and decrypt the information
+going from the server to the clients. 
 
 ### Ibrahim Mkusa @iskm
 Will write the networking code i.e. code that allows communication between
