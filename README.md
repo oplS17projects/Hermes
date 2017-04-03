@@ -72,10 +72,11 @@ satisfactorily we would have met our goals .
 
 ## Architecture Diagram
 
-### Preliminary design
+#### Preliminary design
 ![Architecture](https://github.com/oplS17projects/Hermes/blob/master/arch_diagram.png)
 
-### The Game plan
+
+#### The Game plan
 ![Diagram](https://github.com/oplS17projects/Hermes/blob/master/architecture_diagram.png)
 
 
