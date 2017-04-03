@@ -21,11 +21,13 @@ Hermes.
 
 > Will you use map/filter/reduce? How?
 
-Map will be used for dealing editor area of clients.
+Map will be used for dealing with editor area of clients. Iterating over a list
+of open ports to send messages(we expect a lot more but these are ones off the
+top of our heads)
 
 > Will you use object-orientation? How?
 
-Keeping account of the number of clients will require an object of some sort.
+Keeping count of the number of clients will require an object of some sort.
 With procedures to increment and decrement the number of users
 
 > Will you use functional approaches to processing your data? How?
@@ -48,9 +50,9 @@ GUI state. We will do something that resembles the metacircular evaluator.
 
 
 ### Deliverable and Demonstration
-There are two big deliverables for this project. Code for the server(Hermes,
-get it?), and the clients which not only has code for interacting with Hermes,
-but also a GUI for interactivity with a user like myself. 
+There are two big deliverables for this project. Code for the server
+, and the clients which not only has code for interacting with Hermes,
+but also a GUI for interactivity with a user. 
 
 We plan to demonstrate Hermes by running the server code on a remote machine.
 We will connect to the server via our PCs running client code. We will ssh into
@@ -63,7 +65,9 @@ machine!
 ### Evaluation of Results
 Evaluating Hermes is very simple. Can at least two clients hold a meaningful
 conversation remotely? If Client A speaks at 11:01 am, and client B does so at
-11:01 plus a few seconds, Hermes has to convey  this state correctly.
+11:01 plus a few seconds, Hermes has to convey  this state correctly. Is the GUI
+intuitive for current irc users?  When we can successfully answer this questions
+satisfactorily we would have met our goals .
 
 
 ## Architecture Diagram
@@ -79,10 +83,10 @@ Next we need to create a user interface that looks nice. Some way to control the
 After we have finished the user interface and connecting the machines, we will need to merge them together and begin expanding the utility if time permits.
 
 ### First Milestone (Sun Apr 9)
-Get two different machines to relay information.
+Get two different machines to relay information meaningfully.
 
 ### Second Milestone (Sun Apr 16)
-Get a GUI that looks professional and uses the correct format
+Get a GUI that looks professional and uses the correct format.
 
 ### Public Presentation (Mon Apr 24, Wed Apr 26, or Fri Apr 28 [your date to be determined later])
 Merging the GUI and information relay together into one program. If time permits we also plan on adding additional features.
@@ -93,4 +97,8 @@ Merging the GUI and information relay together into one program. If time permits
 Will write the GUI
 
 ### Ibrahim Mkusa @iskm
-Will write the code
+Will write the networking code i.e. code that allows communication between
+clients through server. I will also write scheduling code responsible for queuing
+fairly and orderly the client messages and broadcasting to the rest of connected
+clients. If time permits, i will also be responsible for authenticating users
+via a backend database. 
