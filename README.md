@@ -80,7 +80,7 @@ satisfactorily we would have met our goals.
 
 
 ## Schedule
-The first step in out project will be to setup a system to get data from one machine to another. What data exactly isn't directly important and the other machine doesn't really need to display it in a pretty manner, it just needs to relay that it has recieved the correct information.
+The first step in our project will be to setup a system to get data from one machine to another. What data exactly isn't directly important and the other machine doesn't really need to display it in a pretty manner, it just needs to relay that it has recieved the correct information.
 
 Next we need to create a user interface that looks nice. Some way to control the connection and display information in a convient and readable format.
 
@@ -106,7 +106,7 @@ going from the server to the clients.
 
 ### Ibrahim Mkusa @iskm
 Will write the networking code i.e. code that allows communication between
-clients through server. I will also write scheduling code responsible for queuing
+clients through server. I will also write scheduling code responsible for queueing
 fairly and orderly the client messages and broadcasting to the rest of connected
 clients. If time permits, i will also be responsible for authenticating users
 via a backend database. 
