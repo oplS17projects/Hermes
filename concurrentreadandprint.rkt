@@ -5,11 +5,13 @@
 ;; author: Ibrahim Mkusa
 ;; about: print and read concurrently
 ;; notes: output may need to be aligned and formatted nicely
+;; look into
+;; https://docs.racket-lang.org/gui/text-field_.html#%28meth._%28%28%28lib._mred%2Fmain..rkt%29._text-field~25%29._get-editor%29%29
 
 ;; create custodian for managing all resources
 ;; so we can shutdown everything at once
-(define guard (make-custodian (current-custodian)))
-(current-custodian guard)
+;(define guard (make-custodian (current-custodian)))
+;(current-custodian guard)
 ;; reads values continously from stdin and redisplays them
 (define (read-loop)
   (display (read-line))
