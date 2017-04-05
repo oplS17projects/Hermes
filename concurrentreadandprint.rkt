@@ -2,6 +2,10 @@
 ;; author: Ibrahim Mkusa
 ;; about: print and read concurrently
 
+;; create custodian for managing all resources
+;; so we can shutdown everything at once
+(define guard (make-custodian (current-custodian)))
+(current-custodian guard)
 ;; reads values continously from stdin and redisplays them
 (define (read-loop)
   (display (read-line))
@@ -25,7 +29,8 @@
   (semaphore-wait fair)
   (define input (read-line))
   ;; do something over here with input maybe send it out
-  (cond ((string=? input "quit") (exit)))
+  (cond ((string=? input "quit") (begin (kill-thread a)
+                                        (kill-thread t))))
   (display (string-append output-prompt input "\n"))
   (semaphore-post fair)
   (read-loop-i)
@@ -43,6 +48,8 @@
                     (read-loop-i))))
 (define a (thread (lambda ()
                     (hello-world))))
+
+(thread-wait t) ;; returns prompt back to drracket
 ;; below doesn't execute
 ; (sleep 10)
 ; (kill-thread t)
