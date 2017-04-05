@@ -1,8 +1,10 @@
 #lang racket
 (require math/base) ;; for random number generation
 
+
 ;; author: Ibrahim Mkusa
 ;; about: print and read concurrently
+;; notes: output may need to be aligned and formatted nicely
 
 ;; create custodian for managing all resources
 ;; so we can shutdown everything at once
@@ -28,7 +30,7 @@
 (define (read-loop-i)
   
   
-  (semaphore-wait fair)
+  ;(semaphore-wait fair)
   (display usernamei)
   (define input (read-line))
   ;; do something over here with input maybe send it out
@@ -38,7 +40,7 @@
   (cond ((string=? input "quit") (begin (kill-thread a)
                                         (kill-thread t))))
   (display (string-append output-prompt input "\n"))
-  (semaphore-post fair)
+  ;(semaphore-post fair)
   (read-loop-i)
   )
 
@@ -47,11 +49,16 @@
 ;; "(hello-world)" can be executed as part of background thread
 ;; that prints in the event there is something in the input port
 (define (hello-world)
-  (sleep (random-integer 0 60)) ;; sleep between 0 and 60 seconds to simulate coms
+  (sleep (random-integer 0 15)) ;; sleep between 0 and 15 seconds to simulate coms
                                 ;; with server
-  (semaphore-wait fair)
-  (display "\nHello, World!\n")
-  (semaphore-post fair)
+  ;(semaphore-wait fair)
+  ;; we will retrieve the line printed below from the server
+  ;; at this time we simulate the input from different users
+  (define what-to-print (random-integer 0 2))
+  (if (= what-to-print 0)
+      (display "Doug: What's up, up?\n")
+      (display "Fred: Looking good, good!\n"))
+  ;(semaphore-post fair)
   (hello-world))
 
 (define t (thread (lambda ()
