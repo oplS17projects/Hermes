@@ -1,4 +1,6 @@
 #lang racket
+(require math/base) ;; for random number generation
+
 ;; author: Ibrahim Mkusa
 ;; about: print and read concurrently
 
@@ -24,11 +26,15 @@
 
 ;; intelligent read, quits when user types in "quit"
 (define (read-loop-i)
-  (display usernamei)
+  
   
   (semaphore-wait fair)
+  (display usernamei)
   (define input (read-line))
   ;; do something over here with input maybe send it out
+  
+  ;; Tests input if its a quit then kills all threads
+  ;; An if would be better here tbh
   (cond ((string=? input "quit") (begin (kill-thread a)
                                         (kill-thread t))))
   (display (string-append output-prompt input "\n"))
@@ -38,9 +44,13 @@
 
 
 ;; print hello world continously
+;; "(hello-world)" can be executed as part of background thread
+;; that prints in the event there is something in the input port
 (define (hello-world)
+  (sleep (random-integer 0 60)) ;; sleep between 0 and 60 seconds to simulate coms
+                                ;; with server
   (semaphore-wait fair)
-  (display "Hello, World!\n")
+  (display "\nHello, World!\n")
   (semaphore-post fair)
   (hello-world))
 
