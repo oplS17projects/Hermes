@@ -1,6 +1,60 @@
 #lang racket
 (require math/base) ;; for random number generation
 
+;; globals
+;; must control access via semaphore as listener thread or broadcast thread
+;; might need to access it
+(define connections '())
+
+;; This is a single server communicating directly to the client
+
+;;;;;;;;;;;;;;;;;;;;;;Server Client communication;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (serve in-port out-port)
+  (let loop []
+    (define evt (sync/timeout 2
+                              (read-line-evt in-port 'any)
+                              (thread-receive-evt)))
+    (cond
+      [(not evt)
+       (displayln "Timed out, exiting")
+       (tcp-abandon-port in-port)
+       (tcp-abandon-port out-port)]
+      [(string? evt)
+       (fprintf out-port "~a~n" evt) ;; echoes back received string
+       (flush-output out-port) ;; flushes the buffer
+       (loop)]  ;; iterates again
+      [else
+        (printf "Received a message in mailbox: ~a~n"
+                (thread-receive))
+        (loop)])))
+
+(define port-num 4322)
+(define (start-server)
+  (define listener (tcp-listen port-num))
+  (thread
+    (lambda ()
+      (let loop ()  ;; the server now loops continously listening in for connections
+      (define-values [in-port out-port] (tcp-accept listener))
+      ;; lets add this open ports to global list of connections
+      (semaphore-wait fair)
+      (append connections (list (list in-port out-port)))
+      (semaphore-post fair)
+      (serve in-port out-port) ; could be do the greeting in here
+      (loop)))))
+
+(start-server)
+
+(define client-thread
+  (thread
+    (lambda ()
+      (define-values [in-port out-port] (tcp-connect "localhost" port-num))
+      
+      (display "first\nsecond\nthird\n" out-port)
+      (flush-output out-port)
+      ; copy-port will block until EOF is read from in-port
+      (copy-port in-port (current-output-port)))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;; author: Ibrahim Mkusa
 ;; about: print and read concurrently
