@@ -12,6 +12,8 @@
 ;(define guard (make-custodian (current-custodian)))
 ;(current-custodian guard)
 ;; reads values continously from stdin and redisplays them
+
+;;;;;; NOT IN USE ;;;;;;;
 (define (read-loop)
   (display (read-line))
   (display "\n")

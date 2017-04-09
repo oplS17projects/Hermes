@@ -22,11 +22,15 @@
   (lambda ()
     (semaphore-wait messages-s)
     (semaphore-wait threads-s)
-    (map (lambda (thread-descriptor)
-           ()))))
-
-(define can-i-broadcast (make-semaphore 1))
-
+    (if (not (null? messages))
+        (begin (map (lambda (thread-descriptor)
+            (thread-send thread-descriptor (first messages))))
+               (set! messages (rest messages))
+        )
+      (display "No message to display\n") ; for later create file port for errors and save error messages to that file
+      )
+    (semaphore-post threads-s)
+    (semaphore-post messages-s)))
 
 ;;
 
@@ -44,7 +48,13 @@
     (define (loop)
       (accept-and-handle listener)
       (loop))
-    (thread loop))
+    (thread loop)
+    ;; Create a thread whose job is to simply call broadcast iteratively
+    (thread (lambda ()
+              (let loopb []
+                broadcast
+                (sleep 10) ;; sleep for 10 seconds between broadcasts
+                (loopb)))))
   (lambda ()
     (displayln "\nGoodbye, shutting down all services\n")
     (custodian-shutdown-all main-cust)))
