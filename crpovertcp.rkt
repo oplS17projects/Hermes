@@ -14,28 +14,6 @@
 
 (define can-i-broadcast (make-semaphore 1))
 
-;; alternative one keep running list of input and output ports directly
-;; broadcasts a message to all connected clients
-(define broadcast-message
-  (lambda (message connections)
-    (map send_message connections)
-    'ok))
-
-; port pair -> '(input-port output-port)
-
-(define (get-input-port port-pair)
-  (car port-pair))
-
-(define (get-output-port  port-pair)
-  (cadr port-pair))
-
-;; gets pair of input and output port of a client and sends a message
-(define send-message
-  (lambda (client_ports)
-    (displayln message (get-output-port (client-ports)))
-    (flush-output (get-output-port (client-ports)))
-    'ok))
-
 
 ;;
 
@@ -100,52 +78,6 @@
   (flush-output out)
 )
 ;; This is a single server communicating directly to the client
-
-;;;;;;;;;;;;;;;;;;;;;;Server Client communication;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define (serve in-port out-port)
-  (let loop []
-    (define evt (sync/timeout 2
-                              (read-line-evt in-port 'any)
-                              (thread-receive-evt)))
-    (cond
-      [(not evt)
-       (displayln "Timed out, exiting")
-       (tcp-abandon-port in-port)
-       (tcp-abandon-port out-port)]
-      [(string? evt)
-       (fprintf out-port "~a~n" evt) ;; echoes back received string
-       (flush-output out-port) ;; flushes the buffer
-       (loop)]  ;; iterates again
-      [else
-        (printf "Received a message in mailbox: ~a~n"
-                (thread-receive))
-        (loop)])))
-
-(define port-num 4322)
-(define (start-server)
-  (define listener (tcp-listen port-num))
-  (thread
-    (lambda ()
-      (let loop ()  ;; the server now loops continously listening in for connections
-      (define-values [in-port out-port] (tcp-accept listener))
-      ;; lets add this open ports to global list of connections
-      (semaphore-wait fair)
-      (append connections (list (list in-port out-port)))
-      (semaphore-post fair)
-      (serve in-port out-port) ; could be do the greeting in here
-      (loop)))))
-
-(start-server)
-
-(define client-thread
-  (thread
-    (lambda ()
-      (define-values [in-port out-port] (tcp-connect "localhost" port-num))
-      
-      (display "first\nsecond\nthird\n" out-port)
-      (flush-output out-port)
-      ; copy-port will block until EOF is read from in-port
-      (copy-port in-port (current-output-port)))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
