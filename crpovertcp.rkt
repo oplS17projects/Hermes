@@ -4,8 +4,101 @@
 ;; globals
 ;; must control access via semaphore as listener thread or broadcast thread
 ;; might need to access it
-(define connections '())
+(define connections '())  ;; maintains a list of open ports
+;; ((in1, out1), (in2, out2), (in3, out3), (in4, out4) ...)
 
+;; lets keep thread descriptor values
+;
+
+(define fair (make-semaphore 1)) ;; managing connections above
+
+(define can-i-broadcast (make-semaphore 1))
+
+;; alternative one keep running list of input and output ports directly
+;; broadcasts a message to all connected clients
+(define broadcast-message
+  (lambda (message connections)
+    (map send_message connections)
+    'ok))
+
+; port pair -> '(input-port output-port)
+
+(define (get-input-port port-pair)
+  (car port-pair))
+
+(define (get-output-port  port-pair)
+  (cadr port-pair))
+
+;; gets pair of input and output port of a client and sends a message
+(define send-message
+  (lambda (client_ports)
+    (displayln message (get-output-port (client-ports)))
+    (flush-output (get-output-port (client-ports)))
+    'ok))
+
+
+;;
+
+;; This is a relay server making two clients communicate
+;; Both `server' and `accept-and-handle' change
+;; to use a custodian.
+;; To start server
+;; (define stop (serve 8080))
+;; (stop) to close the server
+
+(define (serve port-no)
+  (define main-cust (make-custodian))
+  (parameterize ([current-custodian main-cust])
+    (define listener (tcp-listen port-no 5 #t))
+    (define (loop)
+      (accept-and-handle listener)
+      (loop))
+    (thread loop))
+  (lambda ()
+    (displayln "\nGoodbye, shutting down all services\n")
+    (custodian-shutdown-all main-cust)))
+
+(define (accept-and-handle listener)
+  (define cust (make-custodian))
+  (parameterize ([current-custodian cust])
+    (define-values (in out) (tcp-accept listener))
+    (semaphore-wait fair)
+    ;; keep track of open ports
+    (append connections (list (list in out)))
+    (semaphore-wait fiar)
+
+    ; thread will communicate to all clients at once in a broadcast
+    ; manner
+    (thread (lambda ()
+              (handle in out) ;; this handles connection with that specific client
+              (close-input-port in)
+              (close-output-port out)))
+    )
+  ;; Watcher thread:
+  ;; kills current thread for waiting too long for connection from
+  ;; clients
+  (thread (lambda ()
+            (sleep 120)
+            (custodian-shutdown-all cust))))
+
+; (define (handle connections)
+;   ())
+;; each thread needs 2 new threads
+(define (handle in out) 
+  ; define function to deal with in
+  (define (something-to-say in)
+    (sync/timeout 4 (read-line-evt in 'linefeed)))
+  ; define function to deal with out
+  ; thread them each
+  ; (server-loop in out)
+  (sleep 5) ;; wait 5 seconds to guarantee client has already send message
+  (define echo (read-line in)) ;; bind message to echo
+  (displayln (string-append echo "\n"))
+  ; echo back the message, appending echo
+  ; could regex match the input to extract the name
+  (writeln  "Admin: Hello there" out) ;; append "echo " to echo and send back
+  (flush-output out)
+)
 ;; This is a single server communicating directly to the client
 
 ;;;;;;;;;;;;;;;;;;;;;;Server Client communication;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -80,7 +173,6 @@
 (display "What's your name?\n")
 (define username (read-line))
 (define usernamei (string-append username ": ")) ;; make username appear nicer in a prompt
-(define fair (make-semaphore 1))
 
 ;; intelligent read, quits when user types in "quit"
 (define (read-loop-i)
