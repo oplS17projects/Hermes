@@ -13,67 +13,90 @@
 ;(current-custodian guard)
 ;; reads values continously from stdin and redisplays them
 
-;;;;;; NOT IN USE ;;;;;;;
-(define (read-loop)
-  (display (read-line))
-  (display "\n")
-  (read-loop)
-  )
+;; Notes connect to server on localhost
+;; use client template of tcpvanilla
+;; use event for read-write
 
-(define input-prompt "input: ")
-(define output-prompt "output: ")
+;; modify read-loop-i
+; read a value and send it to server via output-port
 
-(define fair (make-semaphore 1))
+; is there something in the input port. If yes? display it
+; in the hello world
 
-;; prompt for username and bind to a variable username
-(display "What's your name?\n")
-(define username (read-line))
-(define usernamei (string-append username ": ")) ;; make username appear nicer in a prompt
+; make connection to server
+(define (client port-no)
+  (define main-client-cust (make-custodian))
+  (parameterize ([current-custodian main-client-cust])
+    ;; connect to server at port 8080
+    (define-values (in out) (tcp-connect "localhost" port-no)) ;; define values
+    (display in)
+    (displayln out)
+    ;; binds to multiple values akin to unpacking tuples in python
+    (display "What's your name?\n")
+    (define username (read-line))
 
-;; intelligent read, quits when user types in "quit"
-(define (read-loop-i)
-  
-  
+  ; (thread (lambda ()
+    ;; make threads 2 lines
+    (define a (thread
+                (lambda ()
+                  (let loop []
+                    (receive-messages in)
+                    (sleep 1)
+                    (loop)))))
+    (define t (thread
+                (lambda ()
+                  (let loop []
+                    (send-messages username out)
+                    (sleep 1)
+                    (loop)))))
+    (thread-wait t) ;; returns prompt back to drracket
+    (close-input-port in)
+    (close-output-port out))
+    (custodian-shutdown-all main-client-cust))
+
+
+;; the send-messages
+(define (send-messages username out)
+  ;; intelligent read, quits when user types in "quit"
   ;(semaphore-wait fair)
-  (display usernamei)
+  ; (display usernamei)
   (define input (read-line))
   ;; do something over here with input maybe send it out
   
   ;; Tests input if its a quit then kills all threads
   ;; An if would be better here tbh
-  (cond ((string=? input "quit") (begin (kill-thread a)
-                                        (kill-thread t))))
-  (display (string-append output-prompt input "\n"))
+  ;; (cond ((string=? input "quit") (begin (kill-thread a)
+                                        ;(kill-thread t))))
+  (cond ((string=? input "quit") (exit)))
+  ;; modify to send messages to out port 
+  (displayln (string-append username ": " input) out)
+  (flush-output out)
+
   ;(semaphore-post fair)
-  (read-loop-i)
-  )
+  ; (read-loop-i out)
+)
+
 
 
 ;; print hello world continously
 ;; "(hello-world)" can be executed as part of background thread
 ;; that prints in the event there is something in the input port
-(define (hello-world)
-  (sleep (random-integer 0 15)) ;; sleep between 0 and 15 seconds to simulate coms
+(define (receive-messages in)
+  ; (sleep (random-integer 0 15)) ;; sleep between 0 and 15 seconds to simulate coms
                                 ;; with server
   ;(semaphore-wait fair)
   ;; we will retrieve the line printed below from the server
-  ;; at this time we simulate the input from different users
-  (define what-to-print (random-integer 0 2))
-  (if (= what-to-print 0)
-      (display "Doug: What's up, up?\n")
-      (display "Fred: Looking good, good!\n"))
+  (define evt (sync/timeout 30 (read-line-evt in)))
+  (cond [(eof-object? evt)
+         (displayln "Server connection closed")
+         (exit)]
+        [(string? evt)
+         (displayln evt)] ; could time stamp here or to send message
+        [else
+          (displayln (string-append "Nothing received from server for 2 minutes."))]
+        )
   ;(semaphore-post fair)
-  (hello-world))
+) 
 
-(define t (thread (lambda ()
-                    (read-loop-i))))
-(define a (thread (lambda ()
-                    (hello-world))))
+(define stop (client 4321))
 
-(thread-wait t) ;; returns prompt back to drracket
-;; below doesn't execute
-; (sleep 10)
-; (kill-thread t)
-; (define a (thread (display "hello world!\n")))
-; (display "John: hello soso\n")
-; (display "Emmanuel: cumbaya!!!!\n")
