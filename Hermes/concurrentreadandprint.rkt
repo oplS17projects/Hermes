@@ -1,12 +1,10 @@
 #lang racket
 (require math/base) ;; for random number generation
 
+;; a proof of concept
+;; one thread waits for input
+;; another displays messages in the background
 
-;; author: Ibrahim Mkusa
-;; about: print and read concurrently
-;; notes: output may need to be aligned and formatted nicely
-;; look into
-;; https://docs.racket-lang.org/gui/text-field_.html#%28meth._%28%28%28lib._mred%2Fmain..rkt%29._text-field~25%29._get-editor%29%29
 
 ;; create custodian for managing all resources
 ;; so we can shutdown everything at once

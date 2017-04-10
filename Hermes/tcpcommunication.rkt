@@ -1,4 +1,7 @@
 #lang racket
+;; Reads input iteratively then sends it to local server
+;; client reads back the message and displays it
+
 (require math/base) ;; for random number generation
 
 (define listener (tcp-listen 4326 5 #t))
