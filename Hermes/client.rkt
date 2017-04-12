@@ -41,7 +41,7 @@
     ;; make threads 2 lines
     (define a (thread
                 (lambda ()
-                  (displayln "Startting receiver thread\n")
+                  (displayln "Starting receiver thread\n")
                   (let loop []
                     (receive-messages in)
                     (sleep 1)
