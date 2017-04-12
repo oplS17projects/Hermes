@@ -4,4 +4,5 @@
 4. message parsable?
 5. command parsable?
 6. keep count of connected clients using object orientation
-7. 
+7. maybe fiddle around with irc library 
+8. separate main running code from definitions

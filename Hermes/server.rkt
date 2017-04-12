@@ -23,7 +23,12 @@
 ;; lets keep things civil
 (define stdout (make-semaphore 1))
 
-;;
+; Takes a string and a semaphore to print safely to stdout
+(define displayln-safe
+  (lambda (a-string a-semaphore)
+    (semaphore-wait a-semaphore)
+    (displayln a-string)
+    (semaphore-post a-semaphore)))
 
 ;; This is a relay server making two clients communicate
 ;; Both `server' and `accept-and-handle' change
@@ -43,9 +48,7 @@
     (thread loop)
     ;; Create a thread whose job is to simply call broadcast iteratively
     (thread (lambda ()
-              (semaphore-wait stdout)
-              (display "Broadcast thread started!\n")
-              (semaphore-post stdout)
+              (displayln-safe "Broadcast thread started!\n" stdout)
               (let loopb []
                 (sleep 0.5)  ;; wait 0.5 secs before beginning to broadcast
                 (broadcast)
@@ -58,12 +61,11 @@
   (define cust (make-custodian))
   (parameterize ([current-custodian cust])
     (define-values (in out) (tcp-accept listener))
-    (semaphore-wait stdout)
-    (displayln "Sucessfully connected to a client")
-    ;(display in)
-    ;(displayln out)
-    (displayln "Sending client Welcome message")
-    (semaphore-post stdout)
+    ;; TODO
+    (displayln-safe (string-append
+                      "Successfully connected to a client.\n"
+                      "Sending client a welcome message.")
+                    stdout)
     (displayln "Welcome to Hermes coms\nType your message below" out)
     (flush-output out)
     ; discard request header
@@ -95,9 +97,9 @@
   ;; kills current thread for waiting too long for connection from
   ;; clients
   (thread (lambda ()
-            (semaphore-wait stdout)
-            (display "Started a thread to kill hanging connecting thread\n")
-            (semaphore-post stdout)
+            (displayln-safe (string-append
+                              "Started a thread to kill hanging "
+                              "connecting threads") stdout)
             (sleep 1360)
             (custodian-shutdown-all cust)))))
 
@@ -109,9 +111,8 @@
   (define (something-to-say in)
     (define evt-t0 (sync/timeout 60  (read-line-evt in 'linefeed)))
     (cond [(eof-object? evt-t0)
-           (semaphore-wait stdout)
-           (displayln "Connection closed. EOF received")
-           (semaphore-post stdout)
+           (displayln-safe "Connection closed. EOF received"
+                           stdout)
            (exit)
            ]
           [(string? evt-t0)
@@ -121,9 +122,7 @@
            (set! messages (append messages (list evt-t0)))
            (semaphore-post messages-s)]
           [else
-           (semaphore-wait stdout)
-           (displayln "Timeout waiting. Nothing received from client")
-           (semaphore-post stdout)]))
+           (displayln-safe "Timeout waiting. Nothing received from client" stdout)]))
 
   ; -----NO LONGER NECESSARY not using thread mailboxes ----
   ; define function to deal with out

@@ -7,12 +7,6 @@
 ;; look into
 ;; https://docs.racket-lang.org/gui/text-field_.html#%28meth._%28%28%28lib._mred%2Fmain..rkt%29._text-field~25%29._get-editor%29%29
 
-; Takes a string and a semaphore to print safely to stdout
-(define displayln-safe
-  (lambda (a-string a-semaphore)
-    (semaphore-wait a-semaphore)
-    (displayln a-string)
-    (semaphore-post a-semaphore)))
 
 ; custodian for client connections
 (define main-client-cust (make-custodian))
