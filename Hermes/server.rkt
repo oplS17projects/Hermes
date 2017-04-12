@@ -47,7 +47,7 @@
               (display "Broadcast thread started!\n")
               (semaphore-post stdout)
               (let loopb []
-                ; (sleep 0.5)  ;; wait 30 secs before beginning to broadcast
+                (sleep 0.5)  ;; wait 0.5 secs before beginning to broadcast
                 (broadcast)
                 (loopb)))))
   (lambda ()

@@ -1,5 +1,6 @@
 #lang racket
 (require math/base) ;; for random number generation
+;; TODO clean up string message output and alignment
 
 ;; author: Ibrahim Mkusa
 ;; about: print and read concurrently
@@ -34,28 +35,28 @@
     (display in)
     (displayln out)
     ;; binds to multiple values akin to unpacking tuples in python
-    (display "What's your name?\n")
+    (displayln "What's your name?")
     (define username (read-line))
 
   ; (thread (lambda ()
     ;; make threads 2 lines
     (define a (thread
                 (lambda ()
-                  (displayln "Starting receiver thread\n")
+                  (displayln "Starting receiver thread.")
                   (let loop []
                     (receive-messages in)
                     (sleep 1)
                     (loop)))))
     (define t (thread
                 (lambda ()
-                  (displayln "Starting sender thread\n")
+                  (displayln "Starting sender thread.")
                   (let loop []
                     (send-messages username out)
                     (sleep 1)
                     (loop)))))
-    (displayln "Now waiting for sender thread")
+    (displayln "Now waiting for sender thread.")
     (thread-wait t) ;; returns prompt back to drracket
-    (displayln "Closing client ports")
+    (displayln "Closing client ports.")
     (close-input-port in)
     (close-output-port out))
     (custodian-shutdown-all main-client-cust))
@@ -75,7 +76,7 @@
                                         ;(kill-thread t))))
   (cond ((string=? input "quit") (exit)))
   ;; modify to send messages to out port 
-  (displayln (string-append username ": " input "\n") out)
+  (displayln (string-append username ": " input) out)
   (flush-output out)
 
   ;(semaphore-post fair)
@@ -94,7 +95,7 @@
   ;; we will retrieve the line printed below from the server
   (define evt (sync/timeout 60 (read-line-evt in)))
   (cond [(eof-object? evt)
-         (displayln "Server connection closed")
+         (displayln "Server connection closed.")
          (custodian-shutdown-all main-client-cust)
          ;(exit)
          ]
@@ -107,5 +108,5 @@
 ) 
 
 (define stop (client 4321))
-(display "Client started\n")
+(displayln "Client started.")
 
