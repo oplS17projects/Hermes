@@ -47,7 +47,7 @@
               (display "Broadcast thread started!\n")
               (semaphore-post stdout)
               (let loopb []
-                (sleep 0.5)  ;; wait 30 secs before beginning to broadcast
+                ; (sleep 0.5)  ;; wait 30 secs before beginning to broadcast
                 (broadcast)
                 (loopb)))))
   (lambda ()
@@ -166,7 +166,7 @@
   (lambda ()
     (semaphore-wait messages-s)
 
-    (if (not (null? messages))
+    (cond [(not (null? messages))
         (begin (map
                 (lambda (ports)
                   (displayln (first messages) (get-output-port ports))
@@ -180,10 +180,11 @@
                ;; current state of messages and connections
                ;messages
                ;connections
-               (displayln "Message broadcasted"))
-        (begin (semaphore-wait stdout)
-               (display "No message to display\n")
-               (semaphore-post stdout)))
+               (displayln "Message broadcasted"))]
+        )
+        ; (begin (semaphore-wait stdout)
+        ;       (display "No message to display\n")
+        ;       (semaphore-post stdout)))
     
     ;;; -- NO LONGER IN USE --- TO BE DELETED
     ; Approach one was to broadcast via thread mailboxes
