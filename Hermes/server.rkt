@@ -19,8 +19,7 @@
 ;; lets keep thread descriptor values
 (define threads '())  ;; stores a list of client serving threads as thread descriptor values
 
-;; several threads that might want to print to stdout
-;; lets keep things civil
+;; Several threads may want to print to stdout, so  lets make things civil
 (define stdout (make-semaphore 1))
 
 ; Takes a string and a semaphore to print safely to stdout
@@ -30,12 +29,6 @@
     (displayln a-string)
     (semaphore-post a-semaphore)))
 
-;; This is a relay server making two clients communicate
-;; Both `server' and `accept-and-handle' change
-;; to use a custodian.
-;; To start server
-;; (define stop (serve 8080))
-;; (stop) to close the server
 
 (define (serve port-no)
   (define main-cust (make-custodian))
@@ -68,46 +61,28 @@
                     stdout)
     (displayln "Welcome to Hermes coms\nType your message below" out)
     (flush-output out)
-    ; discard request header
-    ; Discard the request header (up to blank line):
-    ; (regexp-match #rx"(\r\n|^)\r\n" in)
     (semaphore-wait connections-s)
-    ; (displayln "Got the semaphore")
-    ;; keep track of open ports
     (set! connections (append connections (list (list in out))))
     (semaphore-post connections-s)
-    ; (displayln "Successfully added a pair of ports")
-    connections
 
     ; start a thread to deal with specific client and add descriptor value to the list of threads
     (semaphore-wait threads-s)
     (define threadcom (thread (lambda ()
-              (handle in out) ;; this handles connection with that specific client
-              ;(display "handle successfully completed\n")
-              ; this might have been the issue
-              ;(close-input-port in)
-              ; (close-output-port out)
-                                )))
+              (handle in out)))) ; comms between server and particular client
     (set! threads (append threads (list threadcom)))
     (semaphore-post threads-s)
-    ; (displayln "Successfully created a thread")
-    ; (displayln threadcom)
-    ; threads
-  ;; Watcher thread:
-  ;; kills current thread for waiting too long for connection from
-  ;; clients
-  (thread (lambda ()
-            (displayln-safe (string-append
-                              "Started a thread to kill hanging "
-                              "connecting threads") stdout)
-            (sleep 1360)
-            (custodian-shutdown-all cust)))))
 
-; (define (handle connections)
-;   ())
-;; each thread needs 2 new threads
+    ;; Watcher thread:
+    ;; kills current thread for waiting too long for connection from
+    (thread (lambda ()
+              (displayln-safe (string-append
+                                "Started a thread to kill hanging "
+                                "connecting threads") stdout)
+              (sleep 1360)
+              (custodian-shutdown-all cust)))))
+
 (define (handle in out) 
-  ; define function to deal with incoming messages from client
+  ; deals with queueing incoming messages for server to broadcast to all clients
   (define (something-to-say in)
     (define evt-t0 (sync/timeout 60  (read-line-evt in 'linefeed)))
     (cond [(eof-object? evt-t0)
@@ -124,84 +99,36 @@
           [else
            (displayln-safe "Timeout waiting. Nothing received from client" stdout)]))
 
-  ; -----NO LONGER NECESSARY not using thread mailboxes ----
-  ; define function to deal with out
-  ;(define (something-to-broadcast out)
-  ;  (define evt-t1 (sync/timeout 120 (thread-receive-evt)))
-    ;; send message to client
-  ;  (fprintf out "~a~n" (thread-receive))
-  ;  (flush-output out)
-  ;  )
-  ; thread them each
-
-  ;; i could bind to values, and call wait on them
-  ;; thread that deals with incoming messages for that particular thread
+  ; Executes methods above in another thread
   (thread (lambda ()
             (let loop []
               (something-to-say in)
               ; (sleep 1)
-              (loop))))
+              (loop)))))
 
-  ; (thread (lambda ()
-  ;          (let loop []
-  ;            (something-to-broadcast out)
-              ; (sleep 1)
-  ;            (loop))))
-  ; (server-loop in out)
-  ; (sleep 5) ;; wait 5 seconds to guarantee client has already send message
-  'ok
- )
-
-;; a bunch of selectors, predicates for connections
+; extracts output port from a list pair of input and output port
 (define (get-output-port ports)
-  (cadr ports)
-  )
+  (cadr ports))
 
+; extracts input port
 (define (get-input-port ports)
-  (car ports)
-)
-;; define a broadcast function
+  (car ports))
+
+; broadcasts received message from clients periodically
 (define broadcast
   (lambda ()
     (semaphore-wait messages-s)
-
     (cond [(not (null? messages))
         (begin (map
                 (lambda (ports)
                   (displayln (first messages) (get-output-port ports))
-                  (flush-output (get-output-port ports))
-                  ;; log message to server
-                  ;(displayln "Message sent")
-                  )
+                  (flush-output (get-output-port ports)))
                 connections)
                ;; remove top message
                (set! messages (rest messages))
-               ;; current state of messages and connections
-               ;messages
-               ;connections
-               (displayln "Message broadcasted"))]
-        )
-        ; (begin (semaphore-wait stdout)
-        ;       (display "No message to display\n")
-        ;       (semaphore-post stdout)))
-    
-    ;;; -- NO LONGER IN USE --- TO BE DELETED
-    ; Approach one was to broadcast via thread mailboxes
-    ;(semaphore-wait threads-s)
-    ;(if (not (null? messages))
-     ;   (begin (map (lambda (thread-descriptor)
-      ;      (thread-send thread-descriptor (first messages)))
-       ;             threads)
-        ;       (set! messages (rest messages))
-         ;      (displayln "Broadcasted a message\n")
-        ;)
-      ;(display "No message to display\n") ; for later create file port for errors and save error messages to that file
-      ;)
-   ; messages  ; whats the current state of messages
-    ;(semaphore-post threads-s)
-    
+               (displayln "Message broadcasted"))])
     (semaphore-post messages-s)))
 
+; TODO move to its own file
 (define stop (serve 4321)) ;; start server then close with stop
 (display "Server process started\n")
-
