@@ -11,7 +11,7 @@
 ;; every 5 seconds run to broadcast top message in list
 ;; and remove it from list
 (define messages-s (make-semaphore 1))  ;; control access to messages
-(define messages '("hello, world!"))  ;; stores a list of messages(strings) from currents
+(define messages '())  ;; stores a list of messages(strings) from currents
 
 (define threads-s (make-semaphore 1))  ;; control access to threads
 ;; lets keep thread descriptor values
@@ -35,13 +35,14 @@
     (define (loop)
       (accept-and-handle listener)
       (loop))
+    (displayln "threading the listeneter")
     (thread loop)
     ;; Create a thread whose job is to simply call broadcast iteratively
     (thread (lambda ()
+              (display "Broadcast thread started!\n")
               (let loopb []
-                (sleep 30)  ;; wait 30 secs before beginning to broadcast
+                (sleep 10)  ;; wait 30 secs before beginning to broadcast
                 (broadcast)
-                (sleep 10) ;; sleep for 10 seconds between broadcasts
                 (loopb)))))
   (lambda ()
     (displayln "\nGoodbye, shutting down all services\n")
@@ -51,25 +52,42 @@
   (define cust (make-custodian))
   (parameterize ([current-custodian cust])
     (define-values (in out) (tcp-accept listener))
+    (displayln "Sucessfully connected to a client")
+    (display in)
+    (displayln out)
+    (displayln "Sending client Welcome message")
+    (displayln "Welcome to Hermes coms")
+    (flush-output out)
     ; discard request header
     ; Discard the request header (up to blank line):
-    (regexp-match #rx"(\r\n|^)\r\n" in)
+    ; (regexp-match #rx"(\r\n|^)\r\n" in)
     (semaphore-wait connections-s)
+    (displayln "Got the semaphore")
     ;; keep track of open ports
     (set! connections (append connections (list (list in out))))
     (semaphore-post connections-s)
+    (displayln "Successfully added a pair of ports")
+    connections
 
     ; start a thread to deal with specific client and add descriptor value to the list of threads
-    (set! threads (append threads (list (thread (lambda ()
+    (semaphore-wait threads-s)
+    (define threadcom (thread (lambda ()
               (handle in out) ;; this handles connection with that specific client
-              (close-input-port in)
-              (close-output-port out))))
-            )
-    ) 
+              (display "handle successfully completed\n")
+              ; this might have been the issue
+              ;(close-input-port in)
+              ; (close-output-port out)
+                                )))
+    (set! threads (append threads (list threadcom)))
+    (semaphore-post threads-s)
+    (displayln "Successfully created a thread")
+    (displayln threadcom)
+    threads
   ;; Watcher thread:
   ;; kills current thread for waiting too long for connection from
   ;; clients
   (thread (lambda ()
+            (display "Started a thread to kill hanging connecting thread\n")
             (sleep 360)
             (custodian-shutdown-all cust)))))
 
@@ -79,9 +97,9 @@
 (define (handle in out) 
   ; define function to deal with incoming messages from client
   (define (something-to-say in)
-    (define evt-t0 (sync/timeout 30  (read-line-evt in 'linefeed)))
+    (define evt-t0 (sync/timeout 60  (read-line-evt in 'linefeed)))
     (cond [(eof-object? evt-t0)
-           (displayln (string-append "Connection closed " (current-thread) "exiting"))
+           (displayln "Connection closed. EOF received")
            (exit)
            ]
           [(string? evt-t0)
@@ -91,11 +109,11 @@
            (set! messages (append messages (list evt-t0)))
            (semaphore-post messages-s)]
           [else
-           (displayln (string-append "Nothing received from " (current-thread)))]))
+           (displayln "Timeout waiting. Nothing received from client")]))
 
 
   ; define function to deal with out
-  (define (something-to-send out)
+  (define (something-to-broadcast out)
     (define evt-t1 (sync/timeout 120 (thread-receive-evt)))
     ;; send message to client
     (fprintf out "~a~n" (thread-receive))
@@ -113,7 +131,7 @@
 
   (thread (lambda ()
             (let loop []
-              (something-to-send out)
+              (something-to-broadcast out)
               (sleep 1)
               (loop))))
   ; (server-loop in out)
@@ -131,10 +149,14 @@
             (thread-send thread-descriptor (first messages)))
                     threads)
                (set! messages (rest messages))
+               (displayln "Broadcasted a message\n")
         )
       (display "No message to display\n") ; for later create file port for errors and save error messages to that file
       )
+    messages  ; whats the current state of messages
     (semaphore-post threads-s)
     (semaphore-post messages-s)))
 
 (define stop (serve 4321)) ;; start server then close with stop
+(display "Server process started\n")
+

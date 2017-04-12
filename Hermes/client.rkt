@@ -23,9 +23,11 @@
 ; is there something in the input port. If yes? display it
 ; in the hello world
 
+; custodian for client connections
+(define main-client-cust (make-custodian))
 ; make connection to server
 (define (client port-no)
-  (define main-client-cust (make-custodian))
+  
   (parameterize ([current-custodian main-client-cust])
     ;; connect to server at port 8080
     (define-values (in out) (tcp-connect "localhost" port-no)) ;; define values
@@ -39,17 +41,21 @@
     ;; make threads 2 lines
     (define a (thread
                 (lambda ()
+                  (displayln "Startting receiver thread\n")
                   (let loop []
                     (receive-messages in)
                     (sleep 1)
                     (loop)))))
     (define t (thread
                 (lambda ()
+                  (displayln "Starting sender thread\n")
                   (let loop []
                     (send-messages username out)
                     (sleep 1)
                     (loop)))))
+    (displayln "Now waiting for sender thread")
     (thread-wait t) ;; returns prompt back to drracket
+    (displayln "Closing client ports")
     (close-input-port in)
     (close-output-port out))
     (custodian-shutdown-all main-client-cust))
@@ -69,7 +75,7 @@
                                         ;(kill-thread t))))
   (cond ((string=? input "quit") (exit)))
   ;; modify to send messages to out port 
-  (displayln (string-append username ": " input) out)
+  (displayln (string-append username ": " input "\n") out)
   (flush-output out)
 
   ;(semaphore-post fair)
@@ -89,7 +95,9 @@
   (define evt (sync/timeout 30 (read-line-evt in)))
   (cond [(eof-object? evt)
          (displayln "Server connection closed")
-         (exit)]
+         (custodian-shutdown-all main-client-cust)
+         ;(exit)
+         ]
         [(string? evt)
          (displayln evt)] ; could time stamp here or to send message
         [else
@@ -99,4 +107,5 @@
 ) 
 
 (define stop (client 4321))
+(display "Client started\n")
 
