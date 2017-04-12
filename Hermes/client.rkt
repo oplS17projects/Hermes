@@ -92,7 +92,7 @@
                                 ;; with server
   ;(semaphore-wait fair)
   ;; we will retrieve the line printed below from the server
-  (define evt (sync/timeout 30 (read-line-evt in)))
+  (define evt (sync/timeout 60 (read-line-evt in)))
   (cond [(eof-object? evt)
          (displayln "Server connection closed")
          (custodian-shutdown-all main-client-cust)

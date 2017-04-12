@@ -47,7 +47,7 @@
               (display "Broadcast thread started!\n")
               (semaphore-post stdout)
               (let loopb []
-                (sleep 10)  ;; wait 30 secs before beginning to broadcast
+                (sleep 0.5)  ;; wait 30 secs before beginning to broadcast
                 (broadcast)
                 (loopb)))))
   (lambda ()
@@ -98,7 +98,7 @@
             (semaphore-wait stdout)
             (display "Started a thread to kill hanging connecting thread\n")
             (semaphore-post stdout)
-            (sleep 360)
+            (sleep 1360)
             (custodian-shutdown-all cust)))))
 
 ; (define (handle connections)
