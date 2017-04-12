@@ -6,3 +6,5 @@
 6. keep count of connected clients using object orientation
 7. maybe fiddle around with irc library 
 8. separate main running code from definitions
+9. closure connections, messages, threads. Avoid using set! without an object
+   like make-account
