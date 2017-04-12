@@ -1,0 +1,7 @@
+1. Create a racket module for commonly used functions
+2. Log messages to proper file on server
+3. add timestamps to clients messages
+4. message parsable?
+5. command parsable?
+6. keep count of connected clients using object orientation
+7. 

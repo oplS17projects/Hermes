@@ -1,28 +1,18 @@
 #lang racket
 (require math/base) ;; for random number generation
 ;; TODO clean up string message output and alignment
-
 ;; author: Ibrahim Mkusa
 ;; about: print and read concurrently
 ;; notes: output may need to be aligned and formatted nicely
 ;; look into
 ;; https://docs.racket-lang.org/gui/text-field_.html#%28meth._%28%28%28lib._mred%2Fmain..rkt%29._text-field~25%29._get-editor%29%29
 
-;; create custodian for managing all resources
-;; so we can shutdown everything at once
-;(define guard (make-custodian (current-custodian)))
-;(current-custodian guard)
-;; reads values continously from stdin and redisplays them
-
-;; Notes connect to server on localhost
-;; use client template of tcpvanilla
-;; use event for read-write
-
-;; modify read-loop-i
-; read a value and send it to server via output-port
-
-; is there something in the input port. If yes? display it
-; in the hello world
+; Takes a string and a semaphore to print safely to stdout
+(define displayln-safe
+  (lambda (a-string a-semaphore)
+    (semaphore-wait a-semaphore)
+    (displayln a-string)
+    (semaphore-post a-semaphore)))
 
 ; custodian for client connections
 (define main-client-cust (make-custodian))
