@@ -139,22 +139,48 @@
   'ok
  )
 
+;; a bunch of selectors, predicates for connections
+(define (get-output-port ports)
+  (cadr ports)
+  )
+
+(define (get-input-port ports)
+  (car ports)
+)
 ;; define a broadcast function
 (define broadcast
   (lambda ()
     (semaphore-wait messages-s)
-    (semaphore-wait threads-s)
+
     (if (not (null? messages))
-        (begin (map (lambda (thread-descriptor)
-            (thread-send thread-descriptor (first messages)))
-                    threads)
+        (begin (map
+                (lambda (ports)
+                  (displayln (first messages) (get-output-port ports))
+                  (flush-output (get-output-port ports))
+                  ;; log message to server
+                  (displayln "Message sent")
+                  )
+                connections)
+               ;; remove top message
                (set! messages (rest messages))
-               (displayln "Broadcasted a message\n")
-        )
-      (display "No message to display\n") ; for later create file port for errors and save error messages to that file
-      )
-    messages  ; whats the current state of messages
-    (semaphore-post threads-s)
+               ;; current state of messages and connections
+               messages
+               connections)
+        (display "No message to display\n"))
+    ; Approach one was to broadcast via thread mailboxes
+    ;(semaphore-wait threads-s)
+    ;(if (not (null? messages))
+     ;   (begin (map (lambda (thread-descriptor)
+      ;      (thread-send thread-descriptor (first messages)))
+       ;             threads)
+        ;       (set! messages (rest messages))
+         ;      (displayln "Broadcasted a message\n")
+        ;)
+      ;(display "No message to display\n") ; for later create file port for errors and save error messages to that file
+      ;)
+   ; messages  ; whats the current state of messages
+    ;(semaphore-post threads-s)
+    
     (semaphore-post messages-s)))
 
 (define stop (serve 4321)) ;; start server then close with stop
