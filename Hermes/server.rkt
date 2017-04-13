@@ -1,8 +1,6 @@
 #lang racket
 (require math/base) ;; for random number generation
 
-;; TODO wrap "safer send in a function that takes care of semaphores"
-
 ;; globals
 ; track number of connections with closure
 (define (make-count no-count)
@@ -20,6 +18,7 @@
           [(eq? m 'current-count) current-count]))
   dispatch)
 (define c-count (make-count 0))
+; a semaphore to control access to c-count
 (define c-count-s (make-semaphore 1))
 
 
@@ -38,17 +37,13 @@
            [(eq? m 'add) add]))
    dispatch)
 (define c-connections (make-connections '()))
-
+; a semaphore to control acess to c-connections
 (define connections-s (make-semaphore 1)) ;; control access to connections
 
 ;; every 5 seconds run to broadcast top message in list
 ;; and remove it from list
 (define messages-s (make-semaphore 1))  ;; control access to messages
 (define messages '())  ;; stores a list of messages(strings) from currents
-
-(define threads-s (make-semaphore 1))  ;; control access to threads
-;; lets keep thread descriptor values
-(define threads '())  ;; stores a list of client serving threads as thread descriptor values
 
 ;; Several threads may want to print to stdout, so  lets make things civil
 (define stdout (make-semaphore 1))
