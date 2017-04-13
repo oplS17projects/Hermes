@@ -105,6 +105,11 @@
                       "Sending client a welcome message.")
                     stdout)
     (displayln welcome-message out)
+    ;; print to server log and client
+    (define print-no-users (string-append "Number of users in chat: "
+                                          (number->string ((c-count 'current-count)))))
+    (displayln print-no-users out)
+    (displayln-safe print-no-users stdout)
     (flush-output out)
     (semaphore-wait connections-s)
     ((c-connections 'add) in out)

@@ -43,16 +43,22 @@
 
 ;; sends a message to the server
 (define (send-messages username out)
-  ;; intelligent read, quits when user types in "quit"
-  (define input (read-line))
-  (cond ((string=? input "quit") (exit)))
   ; get current time
   (define date-today (seconds->date (current-seconds) #t))
   ;TODO pad the second if its only 1 character
   (define date-print (string-append (number->string (date-hour date-today))
                                     ":"
+                                    (number->string (date-minute date-today))
+                                    ":"
                                     (number->string (date-second date-today))
-                                    "| "))
+                                    " | "))
+  ;; intelligent read, quits when user types in "quit"
+  (define input (read-line))
+  (cond ((string=? input "quit")
+             (displayln (string-append date-print username " signing out. See ya!") out)
+             (flush-output out)
+             (exit)))
+  
   (displayln (string-append date-print username ": " input) out)
   (flush-output out))
 
