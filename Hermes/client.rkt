@@ -63,5 +63,5 @@
         [else
           (displayln (string-append "Nothing received from server for 2 minutes."))]))
 
+(displayln "Starting client.")
 (define stop (client 4321))
-(displayln "Client started.")

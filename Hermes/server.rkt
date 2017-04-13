@@ -2,6 +2,7 @@
 (require math/base) ;; for random number generation
 
 ;; globals
+(define welcome-message "Welcome to Hermes coms. Type your message below")
 ; track number of connections with closure
 (define (make-count no-count)
   (define (increment)
@@ -40,10 +41,24 @@
 ; a semaphore to control acess to c-connections
 (define connections-s (make-semaphore 1)) ;; control access to connections
 
-;; every 5 seconds run to broadcast top message in list
-;; and remove it from list
+; Track received messages in a closure
+(define (make-messages messages)
+  (define (add message)
+    (set! messages (append messages (list message)))
+    messages)
+  (define (mes-list)
+    messages)
+  (define (remove-top)
+    (set! messages (rest messages))
+    messages)
+  (define (dispatch m)
+    (cond [(eq? m 'add) add]
+          [(eq? m 'mes-list) mes-list]
+          [(eq? m 'remove-top) remove-top]))
+  dispatch)
+(define c-messages (make-messages '()))
+; semaphore to control access to c-messages
 (define messages-s (make-semaphore 1))  ;; control access to messages
-(define messages '())  ;; stores a list of messages(strings) from currents
 
 ;; Several threads may want to print to stdout, so  lets make things civil
 (define stdout (make-semaphore 1))
@@ -86,10 +101,10 @@
     (semaphore-post c-count-s)
 
     (displayln-safe (string-append
-                      "Successfully connected to a client.\n"
+                      "Successfully connected to a client. "
                       "Sending client a welcome message.")
                     stdout)
-    (displayln "Welcome to Hermes coms\nType your message below" out)
+    (displayln welcome-message out)
     (flush-output out)
     (semaphore-wait connections-s)
     ; (set! connections (append connections (list (list in out))))
@@ -97,11 +112,8 @@
     (semaphore-post connections-s)
 
     ; start a thread to deal with specific client and add descriptor value to the list of threads
-    (semaphore-wait threads-s)
     (define threadcom (thread (lambda ()
               (handle in out)))) ; comms between server and particular client
-    (set! threads (append threads (list threadcom)))
-    (semaphore-post threads-s)
 
     ;; Watcher thread:
     ;; kills current thread for waiting too long for connection from
@@ -128,7 +140,7 @@
            (semaphore-wait messages-s)
            ; append the message to list of messages
            (display (string-append evt-t0 "\n"))
-           (set! messages (append messages (list evt-t0)))
+           ((c-messages 'add) evt-t0)
            (semaphore-post messages-s)]
           [else
            (displayln-safe "Timeout waiting. Nothing received from client" stdout)]))
@@ -152,14 +164,14 @@
 (define broadcast
   (lambda ()
     (semaphore-wait messages-s)
-    (cond [(not (null? messages))
+    (cond [(not (null? ((c-messages 'mes-list))))
         (begin (map
                 (lambda (ports)
-                  (displayln (first messages) (get-output-port ports))
+                  (displayln (first ((c-messages 'mes-list))) (get-output-port ports))
                   (flush-output (get-output-port ports)))
                 ((c-connections 'cons-list)))
                ;; remove top message
-               (set! messages (rest messages))
+               ((c-messages 'remove-top))
                (displayln "Message broadcasted"))])
     (semaphore-post messages-s)))
 
