@@ -22,8 +22,8 @@
 (define c-count (make-count 0))
 (define c-count-s (make-semaphore 1))
 
-(define connections '())  ;; maintains a list of open ports
 
+; track list of input output port pairs in a list contained in a closure
 (define (make-connections connections)
   (define (null-cons?)
     (null? connections))
@@ -31,7 +31,13 @@
     (set! connections (append connections (list (list in out))))
     connections)
    (define (cons-list)
-     connections))
+     connections)
+   (define (dispatch m)
+     (cond [(eq? m 'null-cons) null-cons?]
+           [(eq? m 'cons-list) cons-list]
+           [(eq? m 'add) add]))
+   dispatch)
+(define c-connections (make-connections '()))
 
 (define connections-s (make-semaphore 1)) ;; control access to connections
 
@@ -91,7 +97,8 @@
     (displayln "Welcome to Hermes coms\nType your message below" out)
     (flush-output out)
     (semaphore-wait connections-s)
-    (set! connections (append connections (list (list in out))))
+    ; (set! connections (append connections (list (list in out))))
+    ((c-connections 'add) in out)
     (semaphore-post connections-s)
 
     ; start a thread to deal with specific client and add descriptor value to the list of threads
@@ -155,7 +162,7 @@
                 (lambda (ports)
                   (displayln (first messages) (get-output-port ports))
                   (flush-output (get-output-port ports)))
-                connections)
+                ((c-connections 'cons-list)))
                ;; remove top message
                (set! messages (rest messages))
                (displayln "Message broadcasted"))])
