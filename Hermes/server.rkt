@@ -4,10 +4,35 @@
 ;; TODO wrap "safer send in a function that takes care of semaphores"
 
 ;; globals
-;; must control access via semaphore as listener thread or broadcast thread
-;; might need to access it
+; track number of connections with closure
+(define (make-count no-count)
+  (define (increment)
+    (set! no-count (+ no-count 1))
+    no-count)
+  (define (decrement)
+    (set! no-count (- no-count 1))
+    no-count)
+  (define (current-count)
+    no-count)
+  (define (dispatch m)
+    (cond [(eq? m 'increment) increment]
+          [(eq? m 'decrement) decrement]
+          [(eq? m 'current-count) current-count]))
+  dispatch)
+(define c-count (make-count 0))
+(define c-count-s (make-semaphore 1))
+
 (define connections '())  ;; maintains a list of open ports
-;; ((in1, out1), (in2, out2), (in3, out3), (in4, out4) ...)
+
+(define (make-connections connections)
+  (define (null-cons?)
+    (null? connections))
+   (define (add in out)
+    (set! connections (append connections (list (list in out))))
+    connections)
+   (define (cons-list)
+     connections))
+
 (define connections-s (make-semaphore 1)) ;; control access to connections
 
 ;; every 5 seconds run to broadcast top message in list
@@ -54,7 +79,11 @@
   (define cust (make-custodian))
   (parameterize ([current-custodian cust])
     (define-values (in out) (tcp-accept listener))
-    ;; TODO
+    ; increment number of connections
+    (semaphore-wait c-count-s)
+    ((c-count 'increment))
+    (semaphore-post c-count-s)
+
     (displayln-safe (string-append
                       "Successfully connected to a client.\n"
                       "Sending client a welcome message.")
@@ -88,8 +117,11 @@
     (cond [(eof-object? evt-t0)
            (displayln-safe "Connection closed. EOF received"
                            stdout)
-           (exit)
-           ]
+           (semaphore-wait c-count-s)
+           ((c-count 'decrement))
+           (semaphore-post c-count-s)
+           ;(exit)
+           (kill-thread (current-thread))]
           [(string? evt-t0)
            (semaphore-wait messages-s)
            ; append the message to list of messages

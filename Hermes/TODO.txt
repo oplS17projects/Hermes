@@ -6,5 +6,8 @@
 6. keep count of connected clients using object orientation
 7. maybe fiddle around with irc library 
 8. separate main running code from definitions
-9. closure connections, messages, threads. Avoid using set! without an object
+**9. closure connections, messages, threads. Avoid using set! without an object
    like make-account
+make own count to deal with closures
+10. authentication for databases
+11. user can ask for no of logged in users. Server has to parse
