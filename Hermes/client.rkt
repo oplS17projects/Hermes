@@ -46,13 +46,21 @@
   ;; intelligent read, quits when user types in "quit"
   (define input (read-line))
   (cond ((string=? input "quit") (exit)))
-  (displayln (string-append username ": " input) out)
+  ; get current time
+  (define date-today (seconds->date (current-seconds) #t))
+  ;TODO pad the second if its only 1 character
+  (define date-print (string-append (number->string (date-hour date-today))
+                                    ":"
+                                    (number->string (date-second date-today))
+                                    "| "))
+  (displayln (string-append date-print username ": " input) out)
   (flush-output out))
 
 ; receives input from server and displays it to stdout
 (define (receive-messages in)
   ; retrieve a message from server
   (define evt (sync/timeout 60 (read-line-evt in)))
+  
   (cond [(eof-object? evt)
          (displayln "Server connection closed.")
          (custodian-shutdown-all main-client-cust)

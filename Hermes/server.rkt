@@ -107,7 +107,6 @@
     (displayln welcome-message out)
     (flush-output out)
     (semaphore-wait connections-s)
-    ; (set! connections (append connections (list (list in out))))
     ((c-connections 'add) in out)
     (semaphore-post connections-s)
 

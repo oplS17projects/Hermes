@@ -1,6 +1,5 @@
 1. Create a racket module for commonly used functions
 2. Log messages to proper file on server
-3. add timestamps to clients messages
 4. message parsable?
 5. command parsable?
 6. keep count of connected clients using object orientation
@@ -10,4 +9,8 @@
    like make-account
 make own count to deal with closures
 10. authentication for databases
-11. user can ask for no of logged in users. Server has to parse
+11. user can ask for no of logged in users. Server has to pars
+e
+12. Hide user's own input in command line
+13. Need to gracefully handle disconnected clients by removing from list
+of connections
