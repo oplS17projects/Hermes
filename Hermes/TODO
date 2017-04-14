@@ -9,6 +9,6 @@
 11. user can ask for no of logged in users. Server has to pars
 e
 12. Hide user's own input in command line
-** 13. Need to gracefully handle disconnected clients by removing from list
+** 13. Need to gracefully handle disconnected clients by removing from list user filter
 of connections
 14. bye message prompt for clients

@@ -32,9 +32,19 @@
     connections)
    (define (cons-list)
      connections)
+   (define (remove-ports in out)
+     (set! connections
+       (filter 
+         (lambda (ports)
+           (if (and (eq? in (get-input-port ports))
+                    (eq? out (get-output-port ports)))
+             #f
+             #t))
+         connections)))
    (define (dispatch m)
      (cond [(eq? m 'null-cons) null-cons?]
            [(eq? m 'cons-list) cons-list]
+           [(eq? m 'remove-ports) remove-ports]
            [(eq? m 'add) add]))
    dispatch)
 (define c-connections (make-connections '()))
@@ -133,6 +143,11 @@
   (define (something-to-say in)
     (define evt-t0 (sync/timeout 60  (read-line-evt in 'linefeed)))
     (cond [(eof-object? evt-t0)
+           ; TODO remove pair of ports associated with client
+           (semaphore-wait connections-s)
+           ((c-connections 'remove-ports) in out)
+           (semaphore-post connections-s)
+
            (displayln-safe "Connection closed. EOF received"
                            stdout)
            (semaphore-wait c-count-s)
