@@ -12,3 +12,5 @@ e
 14. bye message prompt for clients
 15. Session stickiness for clients
 16. plain tcp -> ssl based 
+17. fix breaks for improper disconnects from clients
+18. Add topics after project completion
