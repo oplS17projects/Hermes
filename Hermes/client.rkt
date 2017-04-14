@@ -4,6 +4,9 @@
 ;; author: Ibrahim Mkusa
 ;; about: print and read concurrently
 ;; notes: output may need to be aligned and formatted nicely
+(define host "10.0.0.160") ; internal home
+(define host2 "67.186.191.81")
+(define port-num 4321)
 
 
 ; custodian for client connections
@@ -12,7 +15,7 @@
 (define (client port-no)
   (parameterize ([current-custodian main-client-cust])
     ;; connect to server at port 8080
-    (define-values (in out) (tcp-connect "localhost" port-no)) ;; define values
+    (define-values (in out) (tcp-connect host2 port-no)) ;; define values
     (display in)
     (displayln out)
     ;; binds to multiple values akin to unpacking tuples in python
