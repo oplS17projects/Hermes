@@ -1,0 +1,14 @@
+FEATURES
+1. Create a racket module for commonly used functions
+2. Log error messages and channel conservations to proper files on server
+4. message parsable?
+5. command parsable?
+7. maybe fiddle around with irc library 
+8. separate main running code from definitions
+10. authentication for databases
+11. user can ask for no of logged in users. Server has to pars
+e
+12. Hide user's own input in command line
+14. bye message prompt for clients
+15. Session stickiness for clients
+16. plain tcp -> ssl based 
