@@ -1,14 +1,26 @@
 #lang racket
 (require math/base) ;; for random number generation
 ;; TODO clean up string message output and alignment
+;; i.e. seconds and minutes hours specifically
 ;; author: Ibrahim Mkusa
 ;; about: print and read concurrently
 ;; notes: output may need to be aligned and formatted nicely
+
+
+
 (define host "10.0.0.160") ; internal home
 (define host2 "67.186.191.81")
 (define host3 "localhost")
 (define port-num 4321)
 
+(define hermes-conf (open-output-file "./hermes.conf" 'append))
+(define hermes-conf-s (make-semaphore 1))
+
+(define convs-out (open-output-file "./convs.out" 'append))
+(define convs-out-s (make-semaphore 1))
+
+(define error-out (open-output-file "./error.out" 'append))
+(define error-out-s (make-semaphore 1))
 
 ; custodian for client connections
 (define main-client-cust (make-custodian))
@@ -17,9 +29,10 @@
   (parameterize ([current-custodian main-client-cust])
     ;; connect to server at port 8080
     (define-values (in out) (tcp-connect host3 port-no)) ;; define values
-    (display in)
-    (displayln out)
     ;; binds to multiple values akin to unpacking tuples in python
+
+    ; store username to a file for later retrieval along with relevent
+    ; info used for authentication with server
     (displayln "What's your name?")
     (define username (read-line))
 

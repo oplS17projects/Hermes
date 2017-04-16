@@ -1,6 +1,5 @@
 FEATURES
 1. Create a racket module for commonly used functions
-2. Log error messages and channel conservations to proper files on server
 4. message parsable?
 5. command parsable?
 7. maybe fiddle around with irc library 
@@ -10,7 +9,9 @@ FEATURES
 e
 12. Hide user's own input in command line
 14. bye message prompt for clients
-15. Session stickiness for clients
+*15. Session stickiness for clients. Log received comms to a local file.
+additionally save user details and prompt user to use defaults or create
+new ones
 16. plain tcp -> ssl based 
 17. fix breaks for improper disconnects from clients
 18. Add topics after project completion
