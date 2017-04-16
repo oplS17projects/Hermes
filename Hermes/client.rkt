@@ -13,13 +13,13 @@
 (define host3 "localhost")
 (define port-num 4321)
 
-(define hermes-conf (open-output-file "./hermes.conf" 'append))
+(define hermes-conf (open-output-file "./hermes.conf" #:exists'append))
 (define hermes-conf-s (make-semaphore 1))
 
-(define convs-out (open-output-file "./convs.out" 'append))
+(define convs-out (open-output-file "./convs.out" #:exists 'append))
 (define convs-out-s (make-semaphore 1))
 
-(define error-out (open-output-file "./error.out" 'append))
+(define error-out (open-output-file "./error.out" #:exists 'append))
 (define error-out-s (make-semaphore 1))
 
 ; custodian for client connections

@@ -1,5 +1,8 @@
 #lang racket
+
+(require "modules/general.rkt")
 (require math/base) ;; for random number generation
+
 
 ;; globals
 (define welcome-message "Welcome to Hermes coms. Type your message below")
@@ -71,27 +74,6 @@
 (define c-messages (make-messages '()))
 ; semaphore to control access to c-messages
 (define messages-s (make-semaphore 1))  ;; control access to messages
-
-;; Several threads may want to print to stdout, so  lets make things civil
-; constant always available
-(define stdout (make-semaphore 1))
-
-; TODO refactor to take a port. defaults to current-output port in this context
-; Takes a string and a semaphore to print safely to stdout
-(define displayln-safe
-  (lambda (a-string [a-semaphore stdout] [a-output-port (current-output-port)])
-    (cond [(not (and (eq? a-semaphore stdout) (eq? a-output-port (current-output-port))))
-           (semaphore-wait a-semaphore)
-           (semaphore-wait stdout)
-           (displayln a-string a-output-port)
-           (flush-output a-output-port)
-           (displayln a-string)
-           (semaphore-post stdout)
-           (semaphore-post a-semaphore)]
-          [else
-            (semaphore-wait stdout)
-            (displayln a-string)
-            (semaphore-post stdout)])))
 
 ; two files to store error messages, and channel conversations
 (define error-out (open-output-file "/home/pcuser/Hermes/Hermes/error.txt" #:exists 'append))
