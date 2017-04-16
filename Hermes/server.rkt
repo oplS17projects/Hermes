@@ -4,9 +4,10 @@
 (require math/base) ;; for random number generation
 
 
-;; globals
 (define welcome-message "Welcome to Hermes coms. Type your message below")
 (define successful-connection-m "Successfully connected to a client. Sending client a welcome message.")
+
+(define sleep-t 0.1)
 
 ; track number of connections with closure
 (define (make-count no-count)
@@ -95,7 +96,7 @@
     (thread (lambda ()
               (displayln-safe "Broadcast thread started!\n")
               (let loopb []
-                (sleep 0.5)  ;; wait 0.5 secs before beginning to broadcast
+                (sleep sleep-t)  ;; wait 0.5 secs before beginning to broadcast
                 (broadcast)
                 (loopb)))))
   (lambda ()

@@ -15,6 +15,7 @@
 (define host2 "67.186.191.81")
 (define host3 "localhost")
 (define port-num 4321)
+(define sleep-t 0.1)
 
 ; we won't need this. Just me being overzealous
 (define hermes-conf (open-output-file "./hermes_client.conf" #:exists'append))
@@ -49,14 +50,14 @@
                   (displayln-safe "Starting receiver thread." error-out-s error-out)
                   (let loop []
                     (receive-messages in)
-                    (sleep 1)
+                    (sleep sleep-t)
                     (loop)))))
     (define t (thread
                 (lambda ()
                   (displayln-safe "Starting sender thread." error-out-s error-out)
                   (let loop []
                     (send-messages username out)
-                    (sleep 1)
+                    (sleep sleep-t)
                     (loop)))))
     (displayln-safe "Now waiting for sender thread." error-out-s error-out)
     (thread-wait t) ;; returns prompt back to drracket
