@@ -115,7 +115,7 @@
 
     ;TODO retrive user name for client here
     ; do some error checking
-    (define username-evt (read-line-evt out))
+    (define username-evt (sync (read-line-evt in 'linefeed)))
     
 
     
