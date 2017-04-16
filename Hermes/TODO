@@ -1,5 +1,5 @@
 FEATURES
-5. command(whisper, color, quit, count, users), message parsable?
+5. command(whisper, count, users), message parsable? parse in the client side should do something similar for settings (color, quit)
 16. plain tcp -> ssl based 
 17. fix breaks for improper disconnects from clients
 18. Add topics after project completion

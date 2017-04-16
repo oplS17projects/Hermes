@@ -150,6 +150,16 @@
               (sleep 1360)
               (custodian-shutdown-all cust)))))
 
+; whisper selector for the username and message
+(define (whisper-info exp)
+  (cadr exp))
+
+(define (whisper-to exp)
+  (caddr exp))
+
+(define (whisper-message exp)
+  (cadddr exp))
+
 (define (chat_with_client in out) 
   ; deals with queueing incoming messages for server to broadcast to all clients
   (define (something-to-say in)
@@ -166,11 +176,36 @@
            ;(exit)
            (kill-thread (current-thread))]
           [(string? evt-t0)
-           (semaphore-wait messages-s)
-           ; append the message to list of messages NO NEED done during broadcast
-           ; (displayln-safe evt-t0 convs-out-s convs-out)
-           ((c-messages 'add) evt-t0)
-           (semaphore-post messages-s)]
+           ; use regexes to evaluate received input from client
+           (define whisper (regexp-match #px"(.*)/whisper\\s+(\\w+)\\s+(.*)" evt-t0)) ; is client trying to whisper to someone
+           (define list-count  (regexp-match #px"(^/list)\\s+(count).*" evt-t0)) ;; is client asking for number of logged in users
+           (define list-users (regexp-match #px"(^/list)\\s+(users).*" evt-t0)) ;; user names
+           (cond [whisper
+                  (semaphore-wait connections-s)
+                  ; get output port for user
+                  (define that-user-ports
+                    (first (filter
+                     (lambda (ports)
+                       (if (string=? (whisper-to whisper) (get-username ports))
+                           #t
+                           #f))
+                     ((c-connections 'cons-list)))))
+                  ; try to send that user the whisper
+                  (if (port-closed? (get-output-port that-user-ports))
+                      (begin
+                        (displayln "User is unavailable" out)
+                        (flush-output out))
+                      (begin
+                        (displayln (string-append (whisper-info whisper) (whisper-message whisper))
+                                   (get-output-port that-user-ports))
+                        (flush-output (get-output-port that-user-ports))))
+                  (semaphore-post connections-s)]
+                 [else
+                  (displayln-safe evt-t0)
+                  (semaphore-wait messages-s)
+                  ; evaluate it .
+                  ((c-messages 'add) evt-t0)
+                  (semaphore-post messages-s)])]    
           [else
            (displayln-safe "Timeout waiting. Nothing received from client")]))
 
@@ -188,6 +223,10 @@
 ; extracts input port
 (define (get-input-port ports)
   (cadr ports))
+
+; extract username
+(define (get-username ports)
+  (car ports))
 
 ; broadcasts received message from clients periodically
 ; TODO before broadcasting the message make sure the ports is still open
