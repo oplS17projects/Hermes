@@ -10,8 +10,8 @@
 ;; notes: output may need to be aligned and formatted nicely
 
 
-; i could prompt for these instead
-(define host "10.0.0.160") ; internal home
+; we will  prompt for these in the gui
+(define host "10.0.0.160")
 (define host2 "67.186.191.81")
 (define host3 "localhost")
 (define port-num 4321)
@@ -107,4 +107,4 @@
           (displayln-safe (string-append "Nothing received from server for 2 minutes.") convs-out-s convs-out)]))
 
 (displayln-safe "Starting client." error-out-s error-out)
-(define stop (client 4321))
+(define stop-client (client 4321))

@@ -260,8 +260,11 @@
     (cond [(not (null? ((c-messages 'mes-list))))
         (begin (map
                 (lambda (ports)
-                  (displayln (first ((c-messages 'mes-list))) (get-output-port ports))
-                  (flush-output (get-output-port ports)))
+                  (if (not (port-closed? (get-output-port ports)))
+                    (begin 
+                        (displayln (first ((c-messages 'mes-list))) (get-output-port ports))
+                        (flush-output (get-output-port ports)))
+                    (displayln-safe "Failed to broadcast. Port not open." error-out-s error-out)))
                 ((c-connections 'cons-list)))
                (displayln-safe (first ((c-messages 'mes-list))) convs-out-s convs-out)
                ;; remove top message
@@ -269,5 +272,5 @@
                (displayln "Message broadcasted"))])
     (semaphore-post messages-s)))
 
-(define stop (serve 4321)) ;; start server then close with stop
+(define stop-server (serve 4321)) ;; start server then close with stop
 (displayln-safe "Server process started\n" error-out-s error-out)

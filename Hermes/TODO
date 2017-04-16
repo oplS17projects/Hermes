@@ -1,15 +1,11 @@
 FEATURES
-5. command(whisper, count, users), message parsable? parse in the client side should do something similar for settings (color, quit)
+5. parser in the client side should do something similar (/color, /quit)
 16. plain tcp -> ssl based 
 17. fix breaks for improper disconnects from clients
 18. Add topics after project completion
 ** regexes to parse strings for different formats -related to 5
-** put into a list if necessary for manipulation
-** sync/timeout to plain sync
 ** align code better for readability
 
-** adjust sleep time on all to be 0.1 for more responsiveness
-** better function names 
 
 GOOD TO HAVE BUT NOT NECESSARY
 7. maybe fiddle around with irc library (we leave this for future opl classes) no time got other classes
@@ -18,7 +14,4 @@ GOOD TO HAVE BUT NOT NECESSARY
 additionally save user details and prompt user to use defaults or create
 new ones
 10. authentication for databases - to avoid dependencies this is left out
-11. user can ask for no of logged in users. - server already reports
-even the list of users connected.
-12. on connection server should also display list of users currently logged in
-** whispers aren't currently logged
+** whispers aren't currently logged - its on purpose
