@@ -1,2 +1,10 @@
 # ignore temporary files
 *~ 
+
+# ignore logs and configuration files
+*.out
+*.conf
+
+# ignore racket compile files
+*.dep
+*.zo

@@ -1,3 +1,3 @@
-# Remove idiotic save files
+# Remove temporary files
 clean:
-	rm -rf *~
+	rm -rf *~ *.out *.conf

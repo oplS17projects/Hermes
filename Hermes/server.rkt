@@ -1,8 +1,14 @@
 #lang racket
+
+(require "modules/general.rkt")
 (require math/base) ;; for random number generation
 
-;; globals
+
 (define welcome-message "Welcome to Hermes coms. Type your message below")
+(define successful-connection-m "Successfully connected to a client. Sending client a welcome message.")
+
+(define sleep-t 0.1)
+
 ; track number of connections with closure
 (define (make-count no-count)
   (define (increment)
@@ -27,8 +33,8 @@
 (define (make-connections connections)
   (define (null-cons?)
     (null? connections))
-   (define (add in out)
-    (set! connections (append connections (list (list in out))))
+   (define (add username in out)
+    (set! connections (append connections (list (list username in out))))
     connections)
    (define (cons-list)
      connections)
@@ -70,99 +76,161 @@
 ; semaphore to control access to c-messages
 (define messages-s (make-semaphore 1))  ;; control access to messages
 
-;; Several threads may want to print to stdout, so  lets make things civil
-(define stdout (make-semaphore 1))
-
-; Takes a string and a semaphore to print safely to stdout
-(define displayln-safe
-  (lambda (a-string a-semaphore)
-    (semaphore-wait a-semaphore)
-    (displayln a-string)
-    (semaphore-post a-semaphore)))
-
-
+; two files to store error messages, and channel conversations
+(define error-out (open-output-file "/home/pcuser/Hermes/Hermes/error_server.txt" #:exists 'append))
+(define convs-out (open-output-file "/home/pcuser/Hermes/Hermes/conversations_server.txt" #:exists 'append))
+(define error-out-s (make-semaphore 1))
+(define convs-out-s (make-semaphore 1))
+; TODO finish logging all error related messages to 
 (define (serve port-no)
   (define main-cust (make-custodian))
   (parameterize ([current-custodian main-cust])
     (define listener (tcp-listen port-no 5 #t))
     (define (loop)
-      (accept-and-handle listener)
+      (receive-clients listener)
       (loop))
-    (displayln "threading the listener")
+    (displayln-safe "Starting up the listener." error-out-s error-out)
     (thread loop)
+    (displayln-safe "Listener successfully started." error-out-s error-out)
     ;; Create a thread whose job is to simply call broadcast iteratively
     (thread (lambda ()
-              (displayln-safe "Broadcast thread started!\n" stdout)
+              (displayln-safe "Broadcast thread started!\n")
               (let loopb []
-                (sleep 0.5)  ;; wait 0.5 secs before beginning to broadcast
+                (sleep sleep-t)  ;; wait 0.5 secs before beginning to broadcast
                 (broadcast)
                 (loopb)))))
   (lambda ()
-    (displayln "\nGoodbye, shutting down all services\n")
+    (displayln-safe "Goodbye, shutting down all services" error-out-s error-out)
+    (semaphore-wait error-out-s)
+    (semaphore-wait convs-out-s)
+    (close-output-port error-out)
+    (close-output-port convs-out)
+    (semaphore-post error-out-s)
+    (semaphore-post convs-out-s)
     (custodian-shutdown-all main-cust)))
 
-(define (accept-and-handle listener)
+(define (receive-clients listener)
   (define cust (make-custodian))
   (parameterize ([current-custodian cust])
     (define-values (in out) (tcp-accept listener))
+
+    ;TODO retrive user name for client here
+    ; do some error checking
+    (define username-evt (sync (read-line-evt in 'linefeed)))
+    
+
+    
     ; increment number of connections
     (semaphore-wait c-count-s)
     ((c-count 'increment))
     (semaphore-post c-count-s)
 
-    (displayln-safe (string-append
-                      "Successfully connected to a client. "
-                      "Sending client a welcome message.")
-                    stdout)
+    (displayln-safe successful-connection-m)
     (displayln welcome-message out)
     ;; print to server log and client
     (define print-no-users (string-append "Number of users in chat: "
                                           (number->string ((c-count 'current-count)))))
     (displayln print-no-users out)
-    (displayln-safe print-no-users stdout)
+    (displayln-safe print-no-users convs-out-s convs-out)
     (flush-output out)
     (semaphore-wait connections-s)
-    ((c-connections 'add) in out)
+    ; TODO add in a username so we have (username input output)
+    ((c-connections 'add) username-evt in out)
     (semaphore-post connections-s)
 
     ; start a thread to deal with specific client and add descriptor value to the list of threads
     (define threadcom (thread (lambda ()
-              (handle in out)))) ; comms between server and particular client
+              (chat_with_client in out)))) ; comms between server and particular client
 
     ;; Watcher thread:
     ;; kills current thread for waiting too long for connection from
     (thread (lambda ()
               (displayln-safe (string-append
                                 "Started a thread to kill hanging "
-                                "connecting threads") stdout)
+                                "connecting threads"))
               (sleep 1360)
               (custodian-shutdown-all cust)))))
 
-(define (handle in out) 
+; whisper selector for the username and message
+(define (whisper-info exp)
+  (cadr exp))
+
+(define (whisper-to exp)
+  (caddr exp))
+
+(define (whisper-message exp)
+  (cadddr exp))
+
+(define (chat_with_client in out) 
   ; deals with queueing incoming messages for server to broadcast to all clients
   (define (something-to-say in)
-    (define evt-t0 (sync/timeout 60  (read-line-evt in 'linefeed)))
+    (define evt-t0 (sync  (read-line-evt in 'linefeed)))
     (cond [(eof-object? evt-t0)
-           ; TODO remove pair of ports associated with client
            (semaphore-wait connections-s)
            ((c-connections 'remove-ports) in out)
            (semaphore-post connections-s)
-
-           (displayln-safe "Connection closed. EOF received"
-                           stdout)
+           ; TODO some form of identification for this client
+           (displayln-safe "Connection closed. EOF received" error-out-s error-out)
            (semaphore-wait c-count-s)
            ((c-count 'decrement))
            (semaphore-post c-count-s)
            ;(exit)
            (kill-thread (current-thread))]
           [(string? evt-t0)
-           (semaphore-wait messages-s)
-           ; append the message to list of messages
-           (display (string-append evt-t0 "\n"))
-           ((c-messages 'add) evt-t0)
-           (semaphore-post messages-s)]
+           ; use regexes to evaluate received input from client
+           (define whisper (regexp-match #px"(.*)/whisper\\s+(\\w+)\\s+(.*)" evt-t0)) ; is client trying to whisper to someone
+           (define list-count  (regexp-match #px"(.*)/list\\s+count\\s*" evt-t0)) ;; is client asking for number of logged in users
+           (define list-users (regexp-match #px"(.*)/list\\s+users\\s*" evt-t0)) ;; user names
+           ; do something whether it was a message, a whisper, request for number of users and so on
+           (cond [whisper
+                  (semaphore-wait connections-s)
+                  ; get output port for user
+                  (define that-user-ports
+                    (first (filter
+                     (lambda (ports)
+                       (if (string=? (whisper-to whisper) (get-username ports))
+                           #t
+                           #f))
+                     ((c-connections 'cons-list)))))
+                  ; try to send that user the whisper
+                  (if (port-closed? (get-output-port that-user-ports))
+                      (begin
+                        (displayln "User is unavailable" out)
+                        (flush-output out))
+                      (begin
+                        (displayln (string-append (whisper-info whisper) (whisper-message whisper))
+                                   (get-output-port that-user-ports))
+                        (flush-output (get-output-port that-user-ports))))
+                  (semaphore-post connections-s)]
+                 [list-count
+                  ;;should put a semaphore on connections
+                  (semaphore-wait c-count-s)
+                  (semaphore-wait connections-s)
+                  (define no-of-users (string-append "Number of users in chat: "
+                                          (number->string ((c-count 'current-count)))))
+                  (displayln no-of-users out)
+                  (flush-output out)
+                  (semaphore-post connections-s)
+                  (semaphore-post c-count-s)
+                  ]
+                 [list-users
+                  (semaphore-wait connections-s)
+                  ; map over connections sending the username to the client
+                  (displayln "Here is a list of users in chat." out)
+                  (map
+                   (lambda (ports)
+                     (displayln (get-username ports) out))
+                   ((c-connections 'cons-list)))
+                  (flush-output out)
+                  (semaphore-post connections-s)]
+                 [else
+                  ; (displayln-safe evt-t0) debug purposes
+                  (semaphore-wait messages-s)
+                  ; evaluate it .
+                  ((c-messages 'add) evt-t0)
+                  (semaphore-post messages-s)])]    
           [else
-           (displayln-safe "Timeout waiting. Nothing received from client" stdout)]))
+           (displayln-safe "Timeout waiting. Nothing received from client")]))
 
   ; Executes methods above in another thread
   (thread (lambda ()
@@ -173,27 +241,36 @@
 
 ; extracts output port from a list pair of input and output port
 (define (get-output-port ports)
-  (cadr ports))
+  (caddr ports))
 
 ; extracts input port
 (define (get-input-port ports)
+  (cadr ports))
+
+; extract username
+(define (get-username ports)
   (car ports))
 
 ; broadcasts received message from clients periodically
+; TODO before broadcasting the message make sure the ports is still open
+; no EOF if it is remove client from connections
 (define broadcast
   (lambda ()
     (semaphore-wait messages-s)
     (cond [(not (null? ((c-messages 'mes-list))))
         (begin (map
                 (lambda (ports)
-                  (displayln (first ((c-messages 'mes-list))) (get-output-port ports))
-                  (flush-output (get-output-port ports)))
+                  (if (not (port-closed? (get-output-port ports)))
+                    (begin 
+                        (displayln (first ((c-messages 'mes-list))) (get-output-port ports))
+                        (flush-output (get-output-port ports)))
+                    (displayln-safe "Failed to broadcast. Port not open." error-out-s error-out)))
                 ((c-connections 'cons-list)))
+               (displayln-safe (first ((c-messages 'mes-list))) convs-out-s convs-out)
                ;; remove top message
                ((c-messages 'remove-top))
                (displayln "Message broadcasted"))])
     (semaphore-post messages-s)))
 
-; TODO move to its own file
-(define stop (serve 4321)) ;; start server then close with stop
-(display "Server process started\n")
+(define stop-server (serve 4321)) ;; start server then close with stop
+(displayln-safe "Server process started\n" error-out-s error-out)
