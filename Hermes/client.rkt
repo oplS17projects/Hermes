@@ -1,4 +1,6 @@
 #lang racket
+
+(require "modules/general.rkt")
 (require math/base) ;; for random number generation
 ;; TODO clean up string message output and alignment
 ;; i.e. seconds and minutes hours specifically
@@ -7,19 +9,19 @@
 ;; notes: output may need to be aligned and formatted nicely
 
 
-
+; i could prompt for these instead
 (define host "10.0.0.160") ; internal home
 (define host2 "67.186.191.81")
 (define host3 "localhost")
 (define port-num 4321)
 
-(define hermes-conf (open-output-file "./hermes.conf" #:exists'append))
+(define hermes-conf (open-output-file "./hermes_client.conf" #:exists'append))
 (define hermes-conf-s (make-semaphore 1))
 
-(define convs-out (open-output-file "./convs.out" #:exists 'append))
+(define convs-out (open-output-file "./convs_client.out" #:exists 'append))
 (define convs-out-s (make-semaphore 1))
 
-(define error-out (open-output-file "./error.out" #:exists 'append))
+(define error-out (open-output-file "./error_client.out" #:exists 'append))
 (define error-out-s (make-semaphore 1))
 
 ; custodian for client connections

@@ -1,5 +1,4 @@
 FEATURES
-1. Create a racket module for commonly used functions
 4. message parsable?
 5. command parsable?
 7. maybe fiddle around with irc library 
@@ -7,8 +6,7 @@ FEATURES
 10. authentication for databases
 11. user can ask for no of logged in users. Server has to pars
 e
-12. Hide user's own input in command line
-14. bye message prompt for clients
+*14. bye message prompt for clients part of session stickiness
 *15. Session stickiness for clients. Log received comms to a local file.
 additionally save user details and prompt user to use defaults or create
 new ones
