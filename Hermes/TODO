@@ -1,10 +1,13 @@
 FEATURES
-4. message parsable?
-5. command parsable?
-8. separate main running code from definitions
+5. command(whisper, color, quit, count, users), message parsable?
 16. plain tcp -> ssl based 
 17. fix breaks for improper disconnects from clients
 18. Add topics after project completion
+** regexes to parse strings for different formats -related to 5
+** put into a list if necessary for manipulation
+
+** adjust sleep time on all to be 0.1 for more responsiveness
+** better function names 
 
 GOOD TO HAVE BUT NOT NECESSARY
 7. maybe fiddle around with irc library (we leave this for future opl classes) no time got other classes
@@ -14,4 +17,6 @@ additionally save user details and prompt user to use defaults or create
 new ones
 10. authentication for databases - to avoid dependencies this is left out
 11. user can ask for no of logged in users. - server already reports
+even the list of users connected.
+12. on connection server should also display list of users currently logged in
 

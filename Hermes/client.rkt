@@ -16,6 +16,7 @@
 (define host3 "localhost")
 (define port-num 4321)
 
+; we won't need this. Just me being overzealous
 (define hermes-conf (open-output-file "./hermes_client.conf" #:exists'append))
 (define hermes-conf-s (make-semaphore 1))
 
@@ -38,6 +39,10 @@
     ; info used for authentication with server
     (displayln "What's your name?")
     (define username (read-line))
+
+    ;send the username to the server (username in out)
+    (displayln username out)
+    (flush-output out)
 
     (define a (thread
                 (lambda ()

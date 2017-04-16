@@ -32,8 +32,8 @@
 (define (make-connections connections)
   (define (null-cons?)
     (null? connections))
-   (define (add in out)
-    (set! connections (append connections (list (list in out))))
+   (define (add username in out)
+    (set! connections (append connections (list (list username in out))))
     connections)
    (define (cons-list)
      connections)
@@ -86,7 +86,7 @@
   (parameterize ([current-custodian main-cust])
     (define listener (tcp-listen port-no 5 #t))
     (define (loop)
-      (accept-and-handle listener)
+      (receive-clients listener)
       (loop))
     (displayln-safe "Starting up the listener." error-out-s error-out)
     (thread loop)
@@ -108,10 +108,17 @@
     (semaphore-post convs-out-s)
     (custodian-shutdown-all main-cust)))
 
-(define (accept-and-handle listener)
+(define (receive-clients listener)
   (define cust (make-custodian))
   (parameterize ([current-custodian cust])
     (define-values (in out) (tcp-accept listener))
+
+    ;TODO retrive user name for client here
+    ; do some error checking
+    (define username-evt (read-line-evt out))
+    
+
+    
     ; increment number of connections
     (semaphore-wait c-count-s)
     ((c-count 'increment))
@@ -126,12 +133,13 @@
     (displayln-safe print-no-users convs-out-s convs-out)
     (flush-output out)
     (semaphore-wait connections-s)
-    ((c-connections 'add) in out)
+    ; TODO add in a username so we have (username input output)
+    ((c-connections 'add) username-evt in out)
     (semaphore-post connections-s)
 
     ; start a thread to deal with specific client and add descriptor value to the list of threads
     (define threadcom (thread (lambda ()
-              (handle in out)))) ; comms between server and particular client
+              (chat_with_client in out)))) ; comms between server and particular client
 
     ;; Watcher thread:
     ;; kills current thread for waiting too long for connection from
@@ -142,7 +150,7 @@
               (sleep 1360)
               (custodian-shutdown-all cust)))))
 
-(define (handle in out) 
+(define (chat_with_client in out) 
   ; deals with queueing incoming messages for server to broadcast to all clients
   (define (something-to-say in)
     (define evt-t0 (sync/timeout 60  (read-line-evt in 'linefeed)))
@@ -175,11 +183,11 @@
 
 ; extracts output port from a list pair of input and output port
 (define (get-output-port ports)
-  (cadr ports))
+  (caddr ports))
 
 ; extracts input port
 (define (get-input-port ports)
-  (car ports))
+  (cadr ports))
 
 ; broadcasts received message from clients periodically
 ; TODO before broadcasting the message make sure the ports is still open
@@ -199,6 +207,5 @@
                (displayln "Message broadcasted"))])
     (semaphore-post messages-s)))
 
-; TODO move to its own file
 (define stop (serve 4321)) ;; start server then close with stop
 (displayln-safe "Server process started\n" error-out-s error-out)
