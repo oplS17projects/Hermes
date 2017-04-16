@@ -3,6 +3,7 @@
 (require "modules/general.rkt")
 (require math/base) ;; for random number generation
 ;; TODO clean up string message output and alignment
+;; TODO close ports after done
 ;; i.e. seconds and minutes hours specifically
 ;; author: Ibrahim Mkusa
 ;; about: print and read concurrently
@@ -40,21 +41,21 @@
 
     (define a (thread
                 (lambda ()
-                  (displayln "Starting receiver thread.")
+                  (displayln-safe "Starting receiver thread." error-out-s error-out)
                   (let loop []
                     (receive-messages in)
                     (sleep 1)
                     (loop)))))
     (define t (thread
                 (lambda ()
-                  (displayln "Starting sender thread.")
+                  (displayln-safe "Starting sender thread." error-out-s error-out)
                   (let loop []
                     (send-messages username out)
                     (sleep 1)
                     (loop)))))
-    (displayln "Now waiting for sender thread.")
+    (displayln-safe "Now waiting for sender thread." error-out-s error-out)
     (thread-wait t) ;; returns prompt back to drracket
-    (displayln "Closing client ports.")
+    (displayln-safe "Closing client ports." error-out-s error-out)
     (close-input-port in)
     (close-output-port out))
     (custodian-shutdown-all main-client-cust))
@@ -71,11 +72,14 @@
                                     ":"
                                     (number->string (date-second date-today))
                                     " | "))
-  ;; intelligent read, quits when user types in "quit"
+  ;; read, quits when user types in "quit"
   (define input (read-line))
+  ; TODO /quit instead of quit
   (cond ((string=? input "quit")
              (displayln (string-append date-print username " signing out. See ya!") out)
              (flush-output out)
+             (close-output-port error-out)
+             (close-output-port convs-out)
              (exit)))
   
   (displayln (string-append date-print username ": " input) out)
@@ -87,14 +91,14 @@
   (define evt (sync/timeout 60 (read-line-evt in)))
   
   (cond [(eof-object? evt)
-         (displayln "Server connection closed.")
+         (displayln-safe "Server connection closed." error-out-s error-out)
          (custodian-shutdown-all main-client-cust)
          ;(exit)
          ]
         [(string? evt)
-         (displayln evt)] ; could time stamp here or to send message
+         (displayln-safe evt convs-out-s convs-out)] ; could time stamp here or to send message
         [else
-          (displayln (string-append "Nothing received from server for 2 minutes."))]))
+          (displayln-safe (string-append "Nothing received from server for 2 minutes.") convs-out-s convs-out)]))
 
-(displayln "Starting client.")
+(displayln-safe "Starting client." error-out-s error-out)
 (define stop (client 4321))

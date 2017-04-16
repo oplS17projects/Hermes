@@ -1,15 +1,17 @@
 FEATURES
 4. message parsable?
 5. command parsable?
-7. maybe fiddle around with irc library 
 8. separate main running code from definitions
-10. authentication for databases
-11. user can ask for no of logged in users. Server has to pars
-e
+16. plain tcp -> ssl based 
+17. fix breaks for improper disconnects from clients
+18. Add topics after project completion
+
+GOOD TO HAVE BUT NOT NECESSARY
+7. maybe fiddle around with irc library (we leave this for future opl classes) no time got other classes
 *14. bye message prompt for clients part of session stickiness
 *15. Session stickiness for clients. Log received comms to a local file.
 additionally save user details and prompt user to use defaults or create
 new ones
-16. plain tcp -> ssl based 
-17. fix breaks for improper disconnects from clients
-18. Add topics after project completion
+10. authentication for databases - to avoid dependencies this is left out
+11. user can ask for no of logged in users. - server already reports
+
