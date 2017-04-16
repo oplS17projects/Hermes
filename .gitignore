@@ -1,5 +1,6 @@
 # ignore temporary files
 *~ 
+*.txt
 
 # ignore logs and configuration files
 *.out

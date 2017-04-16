@@ -77,8 +77,8 @@
 (define messages-s (make-semaphore 1))  ;; control access to messages
 
 ; two files to store error messages, and channel conversations
-(define error-out (open-output-file "/home/pcuser/Hermes/Hermes/error_server.txt" #:exists 'append))
-(define convs-out (open-output-file "/home/pcuser/Hermes/Hermes/conversations_server.txt" #:exists 'append))
+(define error-out (open-output-file "./error_server.txt" #:exists 'append))
+(define convs-out (open-output-file "./conversations_server.txt" #:exists 'append))
 (define error-out-s (make-semaphore 1))
 (define convs-out-s (make-semaphore 1))
 ; TODO finish logging all error related messages to 
