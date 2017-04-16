@@ -179,7 +179,7 @@
            ; use regexes to evaluate received input from client
            (define whisper (regexp-match #px"(.*)/whisper\\s+(\\w+)\\s+(.*)" evt-t0)) ; is client trying to whisper to someone
            (define list-count  (regexp-match #px"(.*)/list\\s+count\\s*" evt-t0)) ;; is client asking for number of logged in users
-           (define list-users (regexp-match #px"(.*)/list\\s+users\\s+(.*)" evt-t0)) ;; user names
+           (define list-users (regexp-match #px"(.*)/list\\s+users\\s*" evt-t0)) ;; user names
            ; do something whether it was a message, a whisper, request for number of users and so on
            (cond [whisper
                   (semaphore-wait connections-s)
@@ -212,6 +212,16 @@
                   (semaphore-post connections-s)
                   (semaphore-post c-count-s)
                   ]
+                 [list-users
+                  (semaphore-wait connections-s)
+                  ; map over connections sending the username to the client
+                  (displayln "Here is a list of users in chat." out)
+                  (map
+                   (lambda (ports)
+                     (displayln (get-username ports) out))
+                   ((c-connections 'cons-list)))
+                  (flush-output out)
+                  (semaphore-post connections-s)]
                  [else
                   (displayln-safe evt-t0)
                   (semaphore-wait messages-s)
