@@ -11,8 +11,6 @@
 
 
 ; we will  prompt for these in the gui
-(define host "10.0.0.160")
-(define host2 "67.186.191.81")
 (define host3 "localhost")
 (define port-num 4321)
 (define sleep-t 0.1)

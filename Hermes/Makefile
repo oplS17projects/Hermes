@@ -1,3 +1,3 @@
 # Remove temporary files
 clean:
-	rm -rf *~ *.out
+	rm -rf *~ *.out *.conf
