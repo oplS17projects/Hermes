@@ -5,6 +5,8 @@ FEATURES
 18. Add topics after project completion
 ** regexes to parse strings for different formats -related to 5
 ** put into a list if necessary for manipulation
+** sync/timeout to plain sync
+** align code better for readability
 
 ** adjust sleep time on all to be 0.1 for more responsiveness
 ** better function names 
@@ -19,4 +21,4 @@ new ones
 11. user can ask for no of logged in users. - server already reports
 even the list of users connected.
 12. on connection server should also display list of users currently logged in
-
+** whispers aren't currently logged

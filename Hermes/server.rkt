@@ -178,8 +178,9 @@
           [(string? evt-t0)
            ; use regexes to evaluate received input from client
            (define whisper (regexp-match #px"(.*)/whisper\\s+(\\w+)\\s+(.*)" evt-t0)) ; is client trying to whisper to someone
-           (define list-count  (regexp-match #px"(^/list)\\s+(count).*" evt-t0)) ;; is client asking for number of logged in users
-           (define list-users (regexp-match #px"(^/list)\\s+(users).*" evt-t0)) ;; user names
+           (define list-count  (regexp-match #px"(.*)/list\\s+count\\s*" evt-t0)) ;; is client asking for number of logged in users
+           (define list-users (regexp-match #px"(.*)/list\\s+users\\s+(.*)" evt-t0)) ;; user names
+           ; do something whether it was a message, a whisper, request for number of users and so on
            (cond [whisper
                   (semaphore-wait connections-s)
                   ; get output port for user
@@ -200,6 +201,17 @@
                                    (get-output-port that-user-ports))
                         (flush-output (get-output-port that-user-ports))))
                   (semaphore-post connections-s)]
+                 [list-count
+                  ;;should put a semaphore on connections
+                  (semaphore-wait c-count-s)
+                  (semaphore-wait connections-s)
+                  (define no-of-users (string-append "Number of users in chat: "
+                                          (number->string ((c-count 'current-count)))))
+                  (displayln no-of-users out)
+                  (flush-output out)
+                  (semaphore-post connections-s)
+                  (semaphore-post c-count-s)
+                  ]
                  [else
                   (displayln-safe evt-t0)
                   (semaphore-wait messages-s)
