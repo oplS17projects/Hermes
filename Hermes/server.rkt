@@ -164,7 +164,7 @@
 (define (chat_with_client in out) 
   ; deals with queueing incoming messages for server to broadcast to all clients
   (define (something-to-say in)
-    (define evt-t0 (sync/timeout 60  (read-line-evt in 'linefeed)))
+    (define evt-t0 (sync  (read-line-evt in 'linefeed)))
     (cond [(eof-object? evt-t0)
            (semaphore-wait connections-s)
            ((c-connections 'remove-ports) in out)
@@ -224,7 +224,7 @@
                   (flush-output out)
                   (semaphore-post connections-s)]
                  [else
-                  (displayln-safe evt-t0)
+                  ; (displayln-safe evt-t0) debug purposes
                   (semaphore-wait messages-s)
                   ; evaluate it .
                   ((c-messages 'add) evt-t0)

@@ -94,7 +94,7 @@
 ; receives input from server and displays it to stdout
 (define (receive-messages in)
   ; retrieve a message from server
-  (define evt (sync/timeout 60 (read-line-evt in)))
+  (define evt (sync (read-line-evt in)))
   
   (cond [(eof-object? evt)
          (displayln-safe "Server connection closed." error-out-s error-out)
