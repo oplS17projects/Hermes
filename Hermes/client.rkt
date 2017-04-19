@@ -1,6 +1,6 @@
 #lang racket
 
-(require "modules/general.rkt")
+(require "modules/general.rkt" "Hermes_Gui1.3.rkt")
 (require math/base) ;; for random number generation
 ;; TODO clean up string message output and alignment
 ;; TODO close ports after done
