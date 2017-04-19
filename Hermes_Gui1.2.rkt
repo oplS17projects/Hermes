@@ -68,8 +68,20 @@
     (send dc set-scale 1 1)
     (send dc set-text-foreground "black")
     ;;messaging stuff
-    (define (user-message username input color)
+
+    (define (user-message-parse string start)
       (begin
+        (define (helper str index)
+          (if (eq? (string-ref str (+ start index)) #\~)
+              (substring str start (+ start index))
+              (helper str (+ index 1))))
+        (helper string start)))
+    
+    (define (user-message onetrueinput)
+      (begin
+        (define username (user-message-parse onetrueinput 0))
+        (define input (user-message-parse onetrueinput  (+ 1(string-length username))))
+        (define color (substring onetrueinput (+ 2 (string-length username) (string-length input))))
         (send dc set-text-foreground color)
         (send dc draw-text (string-append username ":" input) 0 height)
         (set! listy (appendlist listy (list username input color height)))
@@ -82,9 +94,9 @@
         ))
     ;;Add a function that parces input from a string and extracts elements
 
-    
+    ;;This probably won't change...
     (define (send-message input color)
-      (user-message name input color))
+      (user-message (string-append name "~" input "~" color)))
     ;;Although re-draw is kind of misleading, it is just print the whole
     ;;list of strings to the screen
     (define (re-draw-message username input color in-height)
