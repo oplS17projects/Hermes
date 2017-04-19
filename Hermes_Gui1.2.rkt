@@ -75,7 +75,7 @@
           (if (eq? (string-ref str (+ start index)) #\~)
               (substring str start (+ start index))
               (helper str (+ index 1))))
-        (helper string start)))
+        (helper string 0)))
     
     (define (user-message onetrueinput)
       (begin
