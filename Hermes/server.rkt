@@ -1,6 +1,6 @@
 #lang racket
 
-(require "modules/general.rkt")
+(require "modules/general.rkt") ;; common function(s)
 (require math/base) ;; for random number generation
 
 
@@ -53,11 +53,12 @@
            [(eq? m 'remove-ports) remove-ports]
            [(eq? m 'add) add]))
    dispatch)
+; "instantiate" to track the connections
 (define c-connections (make-connections '()))
 ; a semaphore to control acess to c-connections
 (define connections-s (make-semaphore 1)) ;; control access to connections
 
-; Track received messages in a closure
+; Track received messages in a closure. Initialy messages is '()
 (define (make-messages messages)
   (define (add message)
     (set! messages (append messages (list message)))
@@ -72,6 +73,7 @@
           [(eq? m 'mes-list) mes-list]
           [(eq? m 'remove-top) remove-top]))
   dispatch)
+; "instantiate" a make-message variable to track our messages
 (define c-messages (make-messages '()))
 ; semaphore to control access to c-messages
 (define messages-s (make-semaphore 1))  ;; control access to messages
@@ -81,9 +83,12 @@
 (define convs-out (open-output-file "./conversations_server.txt" #:exists 'append))
 (define error-out-s (make-semaphore 1))
 (define convs-out-s (make-semaphore 1))
-; TODO finish logging all error related messages to 
+
+; Main server code wrapped in a function
 (define (serve port-no)
+  ; custodian manages resources put under its domain
   (define main-cust (make-custodian))
+  ; "parameterize" puts resources under the domain of created custodian
   (parameterize ([current-custodian main-cust])
     (define listener (tcp-listen port-no 5 #t))
     (define (loop)
@@ -114,8 +119,7 @@
   (parameterize ([current-custodian cust])
     (define-values (in out) (tcp-accept listener))
 
-    ;TODO retrive user name for client here
-    ; do some error checking
+    ; TODO do some error checking
     (define username-evt (sync (read-line-evt in 'linefeed)))
     
 
@@ -224,6 +228,7 @@
                   (flush-output out)
                   (semaphore-post connections-s)]
                  [else
+                  ; Its an ordinarly message
                   ; (displayln-safe evt-t0) debug purposes
                   (semaphore-wait messages-s)
                   ; evaluate it .
@@ -239,7 +244,7 @@
               ; (sleep 1)
               (loop)))))
 
-; extracts output port from a list pair of input and output port
+; extracts output port from a list pair of username, input and output port
 (define (get-output-port ports)
   (caddr ports))
 
@@ -258,18 +263,20 @@
   (lambda ()
     (semaphore-wait messages-s)
     (cond [(not (null? ((c-messages 'mes-list))))
-        (begin (map
-                (lambda (ports)
-                  (if (not (port-closed? (get-output-port ports)))
-                    (begin 
-                        (displayln (first ((c-messages 'mes-list))) (get-output-port ports))
-                        (flush-output (get-output-port ports)))
-                    (displayln-safe "Failed to broadcast. Port not open." error-out-s error-out)))
-                ((c-connections 'cons-list)))
-               (displayln-safe (first ((c-messages 'mes-list))) convs-out-s convs-out)
-               ;; remove top message
-               ((c-messages 'remove-top))
-               (displayln "Message broadcasted"))])
+        (map
+            (lambda (ports)
+              (if (not (port-closed? (get-output-port ports)))
+                (begin 
+                    (displayln (first ((c-messages 'mes-list))) (get-output-port ports))
+                    (flush-output (get-output-port ports)))
+                (displayln-safe "Failed to broadcast. Port not open." error-out-s error-out)))
+            ((c-connections 'cons-list)))
+        (displayln-safe (first ((c-messages 'mes-list))) convs-out-s convs-out)
+        ;; remove top message from "queue" after broadcasting
+        ((c-messages 'remove-top))
+        ; debugging displayln below
+        ; (displayln "Message broadcasted")
+        ]) ; end of cond
     (semaphore-post messages-s)))
 
 (define stop-server (serve 4321)) ;; start server then close with stop

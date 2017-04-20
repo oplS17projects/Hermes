@@ -25,7 +25,8 @@
 (define error-out (open-output-file "./error_client.out" #:exists 'append))
 (define error-out-s (make-semaphore 1))
 
-; custodian for client connections
+; custodian for client connections. Define at top level since a function needs
+; to see it
 (define main-client-cust (make-custodian))
 ; make connection to server
 (define (client port-no)
