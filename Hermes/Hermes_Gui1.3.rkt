@@ -12,8 +12,7 @@
 (provide make-gui)
 
 (define (make-gui)
-  (begin
-    ;;Create the frame
+    ;;Create the frame/window with title "Example5", width 500 and height 700
     (define main-frame (new frame%
                             [label "Example5"]
                             [width 500]
@@ -144,7 +143,7 @@
             (else (error "Invalid Request" command))
             ))
     ;;dispatch goes below that
-    dispatch))
+    dispatch)
 
 
 ;This one displays information
