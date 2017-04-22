@@ -25,6 +25,7 @@
 (define error-out (open-output-file "./error_client.out" #:exists 'append))
 (define error-out-s (make-semaphore 1))
 
+(define gui (make-gui))
 ; custodian for client connections
 (define main-client-cust (make-custodian))
 ; make connection to server
@@ -38,9 +39,10 @@
     ; info used for authentication with server
     (displayln "What's your name?")
     (define username (read-line))
-
+    ((gui 'set-name) username)
+    (gui 'show)
     ;send the username to the server (username in out)
-    (displayln username out)
+    ;(displayln username out)
     (flush-output out)
 
     (define a (thread
@@ -77,16 +79,22 @@
                                     (number->string (date-second date-today))
                                     " | "))
   ;; read, quits when user types in "quit"
-  (define input (read-line))
+  ;(define input (read-line))
+  (define input (get-output-string (gui 'get-output-port)))
   ; TODO /quit instead of quit
   (cond ((string=? input "quit")
-             (displayln (string-append date-print username " signing out. See ya!") out)
+             ;(displayln (string-append date-print username " signing out. See ya!") out)
              (flush-output out)
              (close-output-port error-out)
              (close-output-port convs-out)
              (exit)))
   
-  (displayln (string-append date-print username ": " input) out)
+  ;(displayln (string-append date-print username ": " input) out)
+  (if (not (null? input))
+      (begin
+        (display input)
+        (displayln input out))
+      '())
   (flush-output out))
 
 ; receives input from server and displays it to stdout
@@ -100,9 +108,12 @@
          ;(exit)
          ]
         [(string? evt)
-         (displayln-safe evt convs-out-s convs-out)] ; could time stamp here or to send message
+         ;(displayln-safe evt convs-out-s convs-out)] ; could time stamp here or to send message
+         ((gui 'recieve-message) evt)]
         [else
-          (displayln-safe (string-append "Nothing received from server for 2 minutes.") convs-out-s convs-out)]))
+          (displayln-safe
+           (string-append "Nothing received from server for 2 minutes.")
+           convs-out-s convs-out)]))
 
 (displayln-safe "Starting client." error-out-s error-out)
 (define stop-client (client 4321))

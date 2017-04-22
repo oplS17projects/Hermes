@@ -9,3 +9,6 @@
 # ignore racket compile files
 *.dep
 *.zo
+
+#ignore backup files
+*.bak

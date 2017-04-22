@@ -126,10 +126,10 @@
     (semaphore-post c-count-s)
 
     (displayln-safe successful-connection-m)
-    (displayln welcome-message out)
+    ;(displayln welcome-message out)
     ;; print to server log and client
-    (define print-no-users (string-append "Number of users in chat: "
-                                          (number->string ((c-count 'current-count)))))
+    (define print-no-users (string-append "Server~Number of users in chat: "
+                                          (number->string ((c-count 'current-count))) "~Red"))
     (displayln print-no-users out)
     (displayln-safe print-no-users convs-out-s convs-out)
     (flush-output out)
@@ -195,7 +195,7 @@
                   ; try to send that user the whisper
                   (if (port-closed? (get-output-port that-user-ports))
                       (begin
-                        (displayln "User is unavailable" out)
+                        (displayln "Server~User is unavailable~red" out)
                         (flush-output out))
                       (begin
                         (displayln (string-append (whisper-info whisper) (whisper-message whisper))
@@ -206,8 +206,9 @@
                   ;;should put a semaphore on connections
                   (semaphore-wait c-count-s)
                   (semaphore-wait connections-s)
-                  (define no-of-users (string-append "Number of users in chat: "
-                                          (number->string ((c-count 'current-count)))))
+                  (define no-of-users (string-append "Server~Number of users in chat: "
+                                          (number->string ((c-count 'current-count)))
+                                          "~red"))
                   (displayln no-of-users out)
                   (flush-output out)
                   (semaphore-post connections-s)
@@ -216,10 +217,13 @@
                  [list-users
                   (semaphore-wait connections-s)
                   ; map over connections sending the username to the client
-                  (displayln "Here is a list of users in chat." out)
+                  (displayln "Server~Here is a list of users in chat.~red" out)
                   (map
                    (lambda (ports)
-                     (displayln (get-username ports) out))
+                     (displayln (string-append
+                                 "Server~"
+                                 (get-username ports)
+                                 "~red")out))
                    ((c-connections 'cons-list)))
                   (flush-output out)
                   (semaphore-post connections-s)]
@@ -262,7 +266,10 @@
                 (lambda (ports)
                   (if (not (port-closed? (get-output-port ports)))
                     (begin 
-                        (displayln (first ((c-messages 'mes-list))) (get-output-port ports))
+                        (displayln (string-append "Server~"
+                                                  (first ((c-messages 'mes-list)))
+                                                  "~red"
+                                                  ) (get-output-port ports))
                         (flush-output (get-output-port ports)))
                     (displayln-safe "Failed to broadcast. Port not open." error-out-s error-out)))
                 ((c-connections 'cons-list)))

@@ -15,7 +15,7 @@
   (begin
     ;;Create the frame
     (define main-frame (new frame%
-                            [label "Example5"]
+                            [label "Hermes"]
                             [width 500]
                             [height 700]
                             ))
@@ -54,13 +54,18 @@
     ;;button stuff
     (define (button-do-stuff b e);b and e do nothing :/
       (begin
-        (if (color-change-request? (send input get-value))
-            (set! my-color (get-color-from-input (send input get-value)))
-            (if (< 0 (string-length (send input get-value)))
-                (send-message (send input get-value) my-color);;
-                '()))
-        (send input set-value "")
-        ))
+        (define given-input (send input get-value))
+        (if (string? given-input)
+            (if (color-change-request? given-input)
+                (set! my-color (get-color-from-input given-input))
+                (if (quit-request? given-input)
+                    (write "quit" the-output-port)
+                    (if (< 0 (string-length-safe given-input))
+                        (send-message (send input get-value) my-color);;
+                        '())))
+        '())
+        (send input set-value "")))
+    
     (define send-button (new button%
                              [parent main-frame]
                              [label "Send"]
@@ -72,33 +77,39 @@
     ;;messaging stuff
 
     (define (user-message-parse string start)
-      (begin
-        (define (helper str index)
-          (if (eq? (string-ref str (+ start index)) #\~)
-              (substring str start (+ start index))
-              (helper str (+ index 1))))
-        (helper string 0)))
-    
+      (define (helper str index)
+        (if (string? string)
+            (if (>= (+ start index) (string-length-safe string))
+                (display string);;Something went wrong
+                (if (eq? (string-ref str (+ start index)) #\~)
+                    (substring-s str start (+ start index))
+                    (helper str (+ index 1))))
+            '()))
+      (helper string start))
+      
     (define (user-message onetrueinput)
-      (begin
-        (define username (user-message-parse onetrueinput 0))
-        (define input (user-message-parse onetrueinput  (+ 1(string-length username))))
-        (define color (substring onetrueinput (+ 2 (string-length username) (string-length input))))
-        (send dc set-text-foreground color)
-        (send dc draw-text (string-append username ":" input) 0 height)
-        (set! listy (appendlist listy (list username input color height)))
-        (set! height (+ height 15))
-        (set! min-v-size (+ min-v-size 15))
-        (if (> (* 20 (string-length input)) min-h-size)
-            (set! min-h-size (* 20 (string-length input)))
-            '())
-        (send read-canvas init-auto-scrollbars min-h-size min-v-size 0 1)
-        ))
+      (if (string? onetrueinput)
+          (let();;This is kind of stupid but whatever it works.
+            (define username (user-message-parse onetrueinput 0))
+            (define user-input (user-message-parse onetrueinput  (+ 1(string-length-safe username))))
+            (define color (substring-s onetrueinput (+ 2 (string-length-safe username) (string-length-safe user-input)) (string-length-safe onetrueinput)))
+            (send dc set-text-foreground color)
+            (send dc draw-text (string-append username ":" user-input) 0 height)
+            (set! listy (appendlist listy (list username user-input color height)))
+            (set! height (+ height 15))
+            (set! min-v-size (+ min-v-size 15))
+            (if (> (* 20 (string-length-safe user-input)) min-h-size)
+                (set! min-h-size (* 20 (string-length-safe user-input)))
+                '())
+            (send read-canvas init-auto-scrollbars min-h-size min-v-size 0 1))
+          '()))
     ;;Add a function that parces input from a string and extracts elements
 
+    (define the-output-port (open-output-string))
+    
     ;;This probably won't change...
     (define (send-message input color)
-      (user-message (string-append name "~" input "~" color)))
+      (write (string-append name "~" input "~" color) the-output-port))
     ;;Although re-draw is kind of misleading, it is just print the whole
     ;;list of strings to the screen
     (define (re-draw-message username input color in-height)
@@ -138,8 +149,9 @@
                                                   (set! name newname)
                                                   (print "Thats not good"))))
             ((eq? command 'recieve-message) user-message)
-            ((eq? command 'get-list) listy)
-            ((eq? command 'set-list) update)
+            ;((eq? command 'get-list) listy)
+            ;((eq? command 'set-list) update)
+            ((eq? command 'get-output-port) the-output-port)
             ;;Something up with that
             (else (error "Invalid Request" command))
             ))
@@ -179,18 +191,38 @@
 (define (get-height-from-list in-list)
   (car (cdr (cdr (cdr in-list)))))
 
+(define (get-color-from-input input)
+  (substring-s input 6 (string-length-safe input)))
+
 
 
 ;this one is a crap version of justpressing the enter key
 (define (color-change-request? given-string)
-  (if (> (string-length given-string) 7)
-      (if (equal? (substring given-string 0 6) "/color")
+  (if (> (string-length-safe given-string) 7)
+      (if (equal? (substring-s given-string 0 6) "/color")
           #t
           #f)
       #f))
 
-(define (get-color-from-input given-string)
-  (substring given-string 7))
+
+(define (quit-request? given-string)
+  (if (>= (string-length-safe given-string) 5)
+      (if ((equal? substring-s given-string 0 5) "/quit")
+          #t
+          #f)
+      #f))
+
+(define (string-length-safe string)
+  (if (string? string)
+      (string-length string)
+      0))
+
+(define (substring-s string start end)
+  (if (<= start end)
+      (if (<= end (string-length-safe string))
+          (substring string start end)
+          "")
+      ""))
 ;(define thing1 (make-gui))
 ;(define thing2 (make-gui))
 
