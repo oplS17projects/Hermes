@@ -1,5 +1,5 @@
 FEATURES
-5. parser in the client side should do something similar (/color, /quit)
+need to pass color settings between users
 16. plain tcp -> ssl based 
 ***17. fix breaks for improper disconnects from clients
 18. Add topics after project completion
