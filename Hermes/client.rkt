@@ -10,9 +10,9 @@
 ;; notes: output may need to be aligned and formatted nicely
 
 
-; we will  prompt for these in the gui
 (define hermes-gui (make-gui)) ;; our gui
 ((hermes-gui 'show))
+(sleep 0.25)
 
 
 (define host3 "localhost")
@@ -44,6 +44,10 @@
     ; TODO 
     ; semaphore for gui object
     ; could display a bubble and prompt for username in GUI object
+
+    ; create a gui object
+    ; (define hermes-gui (make-gui))
+    ; ((hermes-gui 'show))
     (displayln "What's your name?")
     (define username (read-line))
 
@@ -66,11 +70,14 @@
                     (sleep sleep-t)
                     (loop)))))
     (displayln-safe "Now waiting for sender thread." error-out-s error-out)
-    (thread-wait t) ;; returns prompt back to drracket
+    ; (thread-wait t) ;; returns prompt back to drracket
+    )
+
+  (lambda ()
     (displayln-safe "Closing client ports." error-out-s error-out)
-    (close-input-port in)
-    (close-output-port out))
-    (custodian-shutdown-all main-client-cust))
+    ;(close-input-port in)
+    ;(close-output-port out)
+    (custodian-shutdown-all main-client-cust)))
 
 
 ;; sends a message to the server
@@ -85,6 +92,7 @@
                                     (number->string (date-second date-today))
                                     " | "))
   ;; read, quits when user types in "quit"
+  ;; TODO read from GUI instead
   (define input (read-line))
   ; TODO /quit instead of quit
   (cond ((string=? input "quit")
@@ -97,6 +105,11 @@
   (displayln (string-append date-print username ": " input) out)
   (flush-output out))
 
+; sigh why you do this racket
+(define send-to-gui
+  (lambda (message color)
+    ((hermes-gui 'send) message color)))
+
 ; receives input from server and displays it to stdout
 (define (receive-messages in)
   ; retrieve a message from server
@@ -108,10 +121,14 @@
          ;(exit)
          ]
         [(string? evt)
-         (displayln-safe evt convs-out-s convs-out)
-         ((hermes-gui 'send) evt "black")] ; could time stamp here or to send message
+            (displayln-safe evt convs-out-s convs-out)
+            (send-to-gui evt "black")
+            ] ; could time stamp here or to send message
         [else
           (displayln-safe (string-append "Nothing received from server for 2 minutes.") convs-out-s convs-out)]))
 
 (displayln-safe "Starting client." error-out-s error-out)
 (define stop-client (client 4321))
+;(define stop-client (client 4321))
+; we will  prompt for these in the gui
+

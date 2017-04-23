@@ -186,6 +186,7 @@
            (define list-count  (regexp-match #px"(.*)/list\\s+count\\s*" evt-t0)) ;; is client asking for number of logged in users
            (define list-users (regexp-match #px"(.*)/list\\s+users\\s*" evt-t0)) ;; user names
            ; do something whether it was a message, a whisper, request for number of users and so on
+           ; TODO if user doesn't exist handle it
            (cond [whisper
                   (semaphore-wait connections-s)
                   ; get output port for user
