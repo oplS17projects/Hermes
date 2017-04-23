@@ -243,17 +243,33 @@
      ;; prompt user for username
     ;; could randomly assign a user
     ;; after calling get-text set it as new label of text-field
-    (define (get-username)
-            (define returned (get-text-from-user "Username set-up" "Please enter a username"
-                      main-frame "user" (list 'disallow-invalid)
-                      #:validate
-                      (lambda (input)
-                        (if (and (string? input) (<= (string-length input) 10)
-                                 (>= (string-length input) 2))
-                            #t
-                            #f))))
+    ; TODO there is a pattern here could wrap all this into resusable prompt funciton
+    ; 
+    (define (prompt-username)
+          (define returned (get-text-from-user "Username set-up" "Please enter a username"
+                    main-frame "user" (list 'disallow-invalid)
+                    #:validate
+                    (lambda (input)
+                      (if (and (string? input) (<= (string-length input) 10)
+                                (>= (string-length input) 2))
+                          #t
+                          #f))))
       (send input set-label returned)
       returned)
+
+    (define (prompt-hostname)
+          (define returned (get-text-from-user "Hostname set-up" "Please enter a hostname"
+                    main-frame "localhost" (list 'disallow-invalid)
+                    #:validate
+                    (lambda (input)
+                      (if (and (string? input) (<= (string-length input) 50)
+                                (>= (string-length input) 2))
+                          #t
+                          #f))))
+      ; (send input set-label returned)
+      returned)
+
+
 
     ;;dispatch goes below that
     ;; TODO get username function maybe
@@ -264,7 +280,8 @@
             ((eq? command 'get-color) get-my-color)
             ((eq? command 'set-color) set-color)
             ((eq? command 'prompt-color) prompt-color)
-            ((eq? command 'get-username) get-username)
+            ((eq? command 'prompt-username) prompt-username)
+            ((eq? command 'prompt-hostname) prompt-hostname)
             ((eq? command 'send) send-message) ;; call to show a message in a gui
             ((eq? command 'set-name) (lambda (newname) (if (string? newname)
                                                   (set! name newname)
@@ -332,6 +349,6 @@
   (substring given-string 7))
 ;(define thing1 (make-gui))
 ;(define thing2 (make-gui))
-(define hermes-gui (make-gui))
-((hermes-gui 'show))
+; (define hermes-gui (make-gui))
+; ((hermes-gui 'show))
 

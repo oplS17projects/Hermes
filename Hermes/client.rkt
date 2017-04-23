@@ -19,7 +19,8 @@
 ;(sleep 0.25)
 
 
-(define host3 "localhost")
+; (define host3 "localhost")
+(define hostname ((hermes-gui 'prompt-hostname))) 
 (define port-num 4321)
 (define sleep-t 0.1)
 
@@ -42,21 +43,13 @@
 (define (client port-no)
   (parameterize ([current-custodian main-client-cust])
     ;; connect to server at port 8080
-    (define-values (in out) (tcp-connect host3 port-no)) ;; define values
+    ;; TODO catch error here
+    (define-values (in out) (tcp-connect hostname port-no)) ;; define values
     ;; binds to multiple values akin to unpacking tuples in python
 
-    ; store username to a file for later retrieval along with relevent
-    ; info used for authentication with server
-    ; TODO 
-    ; semaphore for gui object
-    ; could display a bubble and prompt for username in GUI object
-
-    ; create a gui object
-    ; (define hermes-gui (make-gui))
-    ; ((hermes-gui 'show))
-    ;(displayln "What's your name?")
-    ;(define username (read-line))
-    (define username ((hermes-gui 'get-username)))
+    ;; TODO could store theses info in a file for retrieval later
+    (define username ((hermes-gui 'prompt-username)))
+    ((hermes-gui 'prompt-color))
 
     ;send the username to the server (username in out)
     (displayln username out)
