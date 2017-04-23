@@ -103,7 +103,7 @@
     (displayln-safe "Listener successfully started." error-out-s error-out)
     ;; Create a thread whose job is to simply call broadcast iteratively
     (thread (lambda ()
-              (displayln-safe "Broadcast thread started!\n")
+              (displayln-safe "Broadcast thread started!")
               (let loopb []
                 (sleep sleep-t)  ;; wait 0.5 secs before beginning to broadcast
                 (broadcast)
@@ -211,7 +211,7 @@
                         (displayln "User is unavailable. /color blue" out)
                         (flush-output out))
                       (begin
-                        (displayln (string-append "(whisper)"
+                        (displayln (string-append "(whisper) "
                                     (whisper-info whisper) (whisper-message whisper))
                                    (get-output-port (car that-user-ports)))
                         (flush-output (get-output-port (car that-user-ports)))))
@@ -291,4 +291,4 @@
     (semaphore-post messages-s)))
 
 (define stop-server (serve 4321)) ;; start server then close with stop
-(displayln-safe "Server process started\n" error-out-s error-out)
+(displayln-safe "Server process started." error-out-s error-out)

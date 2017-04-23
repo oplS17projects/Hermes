@@ -14,3 +14,5 @@ additionally save user details and prompt user to use defaults or create
 new ones
 10. authentication for databases - to avoid dependencies this is left out
 ** whispers aren't currently logged - its on purpose
+automated test sets for networking and client code
+encryption over SSL using root certificates
