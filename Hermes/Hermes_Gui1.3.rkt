@@ -8,13 +8,15 @@
 ;and the color as a string
 
 ;Object stuff
+; TODO make different objects threadable send button vs text area vs canvas
+; TODO gui is just a relay remember
 
 (provide make-gui)
 
 (define (make-gui)
     ;;Create the frame/window with title "Example5", width 500 and height 700
     (define main-frame (new frame%
-                            [label "Example5"]
+                            [label "Hermes"]
                             [width 500]
                             [height 700]
                             ))
@@ -147,6 +149,12 @@
                      (update-helper (cdr given-list))))))
     
     ;;Variables go below functions
+    ; for interfacing with outside elements
+    (define gui-input-in-s '())
+    (define gui-input-out-s '())
+    (define gui-input-in '())
+    (define gui-input-out '())
+
     (define name "Me")
     (define min-h-size 80)
     (define min-v-size 30)
@@ -157,16 +165,22 @@
     (define height 15) ; height between messages drawn on the screen
 
     ;;dispatch goes below that
+    ;; TODO get username function maybe
     (define (dispatch command)
-      (cond ((eq? command 'show) (send main-frame show #t))
-            ((eq? command 'send) send-message)
+      ; show gui should return the users the name as well as its first message
+      ; to be called
+      (cond ((eq? command 'show) (lambda () (send main-frame show #t)))
+            ((eq? command 'gui-input-port))
+            ((eq? command 'send) send-message) ;; call to show a message in a gui
             ((eq? command 'set-name) (lambda (newname) (if (string? newname)
                                                   (set! name newname)
                                                   (print "Thats not good"))))
-            ((eq? command 'recieve-message) user-message)
-            ((eq? command 'get-list) listy)
-            ((eq? command 'set-list) update)
+            ; ((eq? command 'recieve-message) user-message)
+            ; ((eq? command 'get-list) listy)
+            ; ((eq? command 'set-list) update)
             ;;Something up with that
+            ; else should assume a message and output to screen we do not want it
+            ; to fail
             (else (error "Invalid Request" command))
             ))
     ;;dispatch goes below that

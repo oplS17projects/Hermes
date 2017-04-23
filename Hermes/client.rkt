@@ -11,6 +11,10 @@
 
 
 ; we will  prompt for these in the gui
+(define hermes-gui (make-gui)) ;; our gui
+((hermes-gui 'show))
+
+
 (define host3 "localhost")
 (define port-num 4321)
 (define sleep-t 0.1)
@@ -104,7 +108,8 @@
          ;(exit)
          ]
         [(string? evt)
-         (displayln-safe evt convs-out-s convs-out)] ; could time stamp here or to send message
+         (displayln-safe evt convs-out-s convs-out)
+         ((hermes-gui 'send) evt "black")] ; could time stamp here or to send message
         [else
           (displayln-safe (string-append "Nothing received from server for 2 minutes.") convs-out-s convs-out)]))
 
