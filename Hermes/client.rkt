@@ -63,21 +63,21 @@
     (thread-wait t) ;; returns prompt back to drracket
     (displayln-safe "Closing client ports." error-out-s error-out)
     (close-input-port in)
-    (close-output-port out))
+    (close-output-port out)
+    (gui 'close))
     (custodian-shutdown-all main-client-cust))
-
 
 ;; sends a message to the server
 (define (send-messages username out)
   ; get current time
-  (define date-today (seconds->date (current-seconds) #t))
+  ;(define date-today (seconds->date (current-seconds) #t))
   ;TODO pad the second if its only 1 character
-  (define date-print (string-append (number->string (date-hour date-today))
-                                    ":"
-                                    (number->string (date-minute date-today))
-                                    ":"
-                                    (number->string (date-second date-today))
-                                    " | "))
+  ;(define date-print (string-append (number->string (date-hour date-today))
+   ;                                 ":"
+    ;                                (number->string (date-minute date-today))
+     ;                               ":"
+      ;                              (number->string (date-second date-today))
+       ;                             " | "))
   ;; read, quits when user types in "quit"
   ;(define input (read-line))
   (define input (get-output-string (gui 'get-output-port)))
@@ -91,9 +91,11 @@
   
   ;(displayln (string-append date-print username ": " input) out)
   (if (not (null? input))
-      (begin
-        (display input)
-        (displayln input out))
+      (if (not (equal? input ""))
+      ((let()
+        (displayln input);;eat this note
+        (displayln input out)))
+      '())
       '())
   (flush-output out))
 
@@ -109,7 +111,9 @@
          ]
         [(string? evt)
          ;(displayln-safe evt convs-out-s convs-out)] ; could time stamp here or to send message
-         ((gui 'recieve-message) evt)]
+         (if (not (equal? evt ""))
+         ((gui 'recieve-message) evt)
+         '())]
         [else
           (displayln-safe
            (string-append "Nothing received from server for 2 minutes.")

@@ -13,6 +13,7 @@
 
 (define (make-gui)
   (begin
+    (displayln "Makin...");;eat this note
     ;;Create the frame
     (define main-frame (new frame%
                             [label "Hermes"]
@@ -88,7 +89,9 @@
       (helper string start))
       
     (define (user-message onetrueinput)
-      (if (string? onetrueinput)
+      (display "Godit!");;eat this note
+      (displayln onetrueinput);;eat this note
+      (if (not (string=? onetrueinput ""))
           (let();;This is kind of stupid but whatever it works.
             (define username (user-message-parse onetrueinput 0))
             (define user-input (user-message-parse onetrueinput  (+ 1(string-length-safe username))))
@@ -114,6 +117,7 @@
     ;;list of strings to the screen
     (define (re-draw-message username input color in-height)
       (begin
+        (displayln "Fixy!");eat this note
         (send dc set-text-foreground color)
         (send dc draw-text (string-append username ":" input) 0 in-height)
         ))
@@ -144,6 +148,7 @@
     ;;dispatch goes below that
     (define (dispatch command)
       (cond ((eq? command 'show) (send main-frame show #t))
+            ((eq? command 'close)(send main-frame show #f))
             ((eq? command 'send) send-message)
             ((eq? command 'set-name) (lambda (newname) (if (string? newname)
                                                   (set! name newname)
@@ -207,7 +212,7 @@
 
 (define (quit-request? given-string)
   (if (>= (string-length-safe given-string) 5)
-      (if ((equal? substring-s given-string 0 5) "/quit")
+      (if (equal? (substring-s given-string 0 5) "/quit")
           #t
           #f)
       #f))

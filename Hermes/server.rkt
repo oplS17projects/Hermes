@@ -60,8 +60,10 @@
 ; Track received messages in a closure
 (define (make-messages messages)
   (define (add message)
-    (set! messages (append messages (list message)))
-    messages)
+    (if (string=? message "")
+        messages
+    ((set! messages (append messages (list message)))
+    messages)))
   (define (mes-list)
     messages)
   (define (remove-top)
@@ -266,15 +268,15 @@
                 (lambda (ports)
                   (if (not (port-closed? (get-output-port ports)))
                     (begin 
-                        (displayln (string-append "Server~"
-                                                  (first ((c-messages 'mes-list)))
-                                                  "~red"
-                                                  ) (get-output-port ports))
+                        (displayln (first ((c-messages 'mes-list)))
+                                   (get-output-port ports))
                         (flush-output (get-output-port ports)))
                     (displayln-safe "Failed to broadcast. Port not open." error-out-s error-out)))
                 ((c-connections 'cons-list)))
                (displayln-safe (first ((c-messages 'mes-list))) convs-out-s convs-out)
                ;; remove top message
+               (displayln (null? ((c-messages 'mes-list))));;eat this note
+               (displayln ((c-messages 'mes-list)));;eat this note
                ((c-messages 'remove-top))
                (displayln "Message broadcasted"))])
     (semaphore-post messages-s)))
