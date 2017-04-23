@@ -1,5 +1,4 @@
 # Hermes - the code
-# This is a work in progress. Kindly report all issues
 ## Installation
 
 The only pre-requisite is to have a recent version of Drracket, then go ahead
@@ -18,8 +17,9 @@ you are good to go.
 
 ### Clients
 
-In the clients follow the prompt to set you up. Type in messages to send to
-other clients.
+In the clients follow the prompts to set you up. Type in messages to send to
+other clients. You may try connecting to server instance running locally
+"localhost" or have an ip-address for a hermes server running elsewhere.
 
 #### Commands
 * Change color of your messages with /color color. Default is black.
