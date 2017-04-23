@@ -22,7 +22,7 @@ In the clients follow the prompt to set you up. Type in messages to send to
 other clients. You can list users in chat with /list users. You can get the
 count of users with /list count. If you want to send a message to a particular
 user, do /whisper username message in chat. If you want to leave chat, type in
-quit. As a consequence you can't use quit alone in your messages.
+/quit. As a consequence you can't use /quit alone in your messages.
 
 ### Server
 
