@@ -9,9 +9,6 @@
 
 ;Object stuff
 ; TODO make different objects threadable send button vs text area vs canvas
-; TODO gui is just a relay remember
-; TODO create a dialog to ask user for his username. This should be wrapped in a
-; function get-username that we can call 
 
 (provide make-gui)
 
@@ -200,7 +197,8 @@
     (define name "Me")
     (define min-h-size 80)
     (define min-v-size 30)
-    (define listy (list (list "Server" "Connected" "Red" 0))) ; initializes
+    ;(define listy (list (list "Server" "Connected" "Red" 0))) ; initializes
+    (define listy '())
       ; listy with first message to be drawn on screen
     ; wrap in closure
     (define my-color "black") ; default color of the text messages if none
@@ -225,7 +223,8 @@
                             #f))))
       (set! my-color returned)
       returned)
-    (define height 15) ; height between messages drawn on the screen
+    (define height 0) ; determines starting height
+    ; TODO create height variable that stores the height/space between messages
 
      ;; prompt user for username
     ;; could randomly assign a user
