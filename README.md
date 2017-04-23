@@ -75,12 +75,8 @@ intuitive for current irc users?  We successfully met these questions, and more.
 
 ## Architecture Diagram
 
-#### Preliminary design
+#### Completed design
 ![Architecture](https://github.com/oplS17projects/Hermes/blob/master/ext/arch_diagram.png)
-
-
-#### The Game plan
-![Diagram](https://github.com/oplS17projects/Hermes/blob/master/ext/architecture_diagram.png)
 
 
 ## Schedule
