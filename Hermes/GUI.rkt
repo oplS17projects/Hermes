@@ -115,6 +115,9 @@
                              [label "Send"]
                              [callback button-do-stuff]))
 
+
+    (send input focus) ; move focus to text-field
+
     ; get-dc retrieves the canvas' device context. From racket docs. A dc object
     ; is a drawing context for drawing graphics and text. It represents output 
     ; devices in a generic way.
