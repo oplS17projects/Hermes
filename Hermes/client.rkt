@@ -97,9 +97,9 @@
   ;; read, quits when user types in "quit"
   ;; TODO read from GUI instead
   ;(define input (read-line))
-  (semaphore-wait hermes-gui-s)
+  ;(semaphore-wait hermes-gui-s)
   (define input ((hermes-gui 'get-message)))
-  (semaphore-post hermes-gui-s)
+  ;(semaphore-post hermes-gui-s)
   ; TODO prompt for color as well
   
   ; TODO /quit instead of quit
@@ -134,9 +134,9 @@
             (displayln-safe evt convs-out-s convs-out)
             ; TODO set color to current client if the message is from him
             ; otherwise set it to the remote
-            (semaphore-wait hermes-gui-s)
+            ;(semaphore-wait hermes-gui-s)
             (send-to-gui evt ((hermes-gui 'get-color)))
-            (semaphore-post hermes-gui-s)
+            ;(semaphore-post hermes-gui-s)
             ] ; could time stamp here or to send message
         [else
           (displayln-safe (string-append "Nothing received from server for 2 minutes.") convs-out-s convs-out)]))
