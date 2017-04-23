@@ -1,4 +1,8 @@
 #lang racket
+; Author: Ibrahim Mkusa
+; About: code that enables communication with the client. It uses GUI code
+; authored by Doug-Richardson
+
 
 (require "modules/general.rkt" "GUI.rkt")
 (require math/base) ;; for random number generation

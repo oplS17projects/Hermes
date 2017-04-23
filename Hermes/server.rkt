@@ -1,12 +1,15 @@
 #lang racket
+; Author: Ibrahim Mkusa
+; About: code that powers Hermes server
+
 
 (require "modules/general.rkt") ;; common function(s)
 (require math/base) ;; for random number generation
 
 
-;; server messages in black
-(define welcome-message "Welcome to Hermes coms. Type your message below /color black ")
-(define successful-connection-m "Successfully connected to a client. Sending client a welcome message. /color black ")
+;; server messages in blue
+(define welcome-message "Welcome to Hermes coms. Type your message below /color blue ")
+(define successful-connection-m "Successfully connected to a client. Sending client a welcome message. /color blue ")
 
 (define sleep-t 0.1)
 
@@ -135,7 +138,7 @@
     ;; print to server log and client
     (define print-no-users (string-append "Number of users in chat: "
                                           (number->string ((c-count 'current-count)))
-                                          " /color black"))
+                                          " /color blue"))
     (displayln print-no-users out)
     (displayln-safe print-no-users convs-out-s convs-out)
     (flush-output out)
@@ -205,7 +208,7 @@
                   (if (and (null? that-user-ports)
                            #t) ; #t is placeholder for further checks
                       (begin
-                        (displayln "User is unavailable. /color black" out)
+                        (displayln "User is unavailable. /color blue" out)
                         (flush-output out))
                       (begin
                         (displayln (string-append "(whisper)"
@@ -219,7 +222,7 @@
                   (semaphore-wait connections-s)
                   (define no-of-users (string-append "Number of users in chat: "
                                           (number->string ((c-count 'current-count)))
-                                          " /color black"))
+                                          " /color blue"))
                   (displayln no-of-users out)
                   (flush-output out)
                   (semaphore-post connections-s)
@@ -228,10 +231,10 @@
                  [list-users
                   (semaphore-wait connections-s)
                   ; map over connections sending the username to the client
-                  (displayln "Here is a list of users in chat. /color black" out)
+                  (displayln "Here is a list of users in chat. /color blue" out)
                   (map
                    (lambda (ports)
-                     (displayln (string-append (get-username ports) " /color black") out))
+                     (displayln (string-append (get-username ports) " /color blue") out))
                    ((c-connections 'cons-list)))
                   (flush-output out)
                   (semaphore-post connections-s)]
