@@ -189,7 +189,7 @@
            (define list-users (regexp-match #px"(.*)/list\\s+users\\s*" evt-t0)) ;; user names
            ; do something whether it was a message, a whisper, request for number of users and so on
 
-           ; TODO if user doesn't exist handle it********
+           
            (cond [whisper
                   (semaphore-wait connections-s)
                   ; get output port for user
@@ -208,7 +208,8 @@
                         (displayln "User is unavailable. /color black" out)
                         (flush-output out))
                       (begin
-                        (displayln (string-append (whisper-info whisper) (whisper-message whisper))
+                        (displayln (string-append "(whisper)"
+                                    (whisper-info whisper) (whisper-message whisper))
                                    (get-output-port (car that-user-ports)))
                         (flush-output (get-output-port (car that-user-ports)))))
                   (semaphore-post connections-s)]
