@@ -99,7 +99,7 @@
   ; TODO prompt for color as well
   
   ; TODO /quit instead of quit
-  (cond ((string=? input "quit")
+  (cond ((string=? input "/quit")
              (displayln (string-append date-print username " signing out. See ya!") out)
              (flush-output out)
              (close-output-port error-out)

@@ -65,7 +65,7 @@
     ; TODO make label setable
     (define input (new text-field%
                        [parent main-frame]
-                       [label "Username:"]
+                       [label "user"]
                        [callback text-field-callback]
                        ))
 
@@ -194,10 +194,13 @@
 
      ;; prompt user for username
     ;; could randomly assign a user
+    ;; after calling get-text set it as new label of text-field
     (define (get-username)
-            (get-text-from-user "Username set-up" "Please enter a username"
+            (define returned (get-text-from-user "Username set-up" "Please enter a username"
                       main-frame "user" (list 'disallow-invalid)
                       #:validate string? ))
+      (send input set-label returned)
+      returned)
 
     ;;dispatch goes below that
     ;; TODO get username function maybe
