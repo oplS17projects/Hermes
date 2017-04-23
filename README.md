@@ -107,4 +107,5 @@ through the GUI.
 I wrote the networking code i.e. code that allows communication between
 clients through server. I wrote scheduling code responsible for queueing
 fairly the client messages and broadcasting to the rest of connected
-clients. I also implemented the logic for handling /list, /whisper commands.
+clients. I also implemented the logic for handling /list, /whisper commands,
+dialogs for gui code and related utilities.

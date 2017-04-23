@@ -43,6 +43,7 @@
 (define (client port-no)
   (parameterize ([current-custodian main-client-cust])
     ;; connect to server at port 8080
+    
     ;; TODO catch error here
     (define-values (in out) (tcp-connect hostname port-no)) ;; define values
     ;; binds to multiple values akin to unpacking tuples in python
