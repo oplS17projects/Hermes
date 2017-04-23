@@ -25,6 +25,8 @@
                             [label "Hermes"]
                             [width 500]
                             [height 700]
+                            [min-width 500]
+                            [min-height 700]
                             ))
     ;;Editing canvas
     (define (do-stuff-paint paint-canvas paint-dc)
@@ -47,6 +49,8 @@
                              [parent main-frame]
                              [paint-callback do-stuff-paint]
                              [style '(hscroll vscroll)]
+                             [min-width 450]
+                             [min-height 690]
                              ))
 
     ; "send" is rackets way of doing object-oriented programming. It calls an
@@ -58,6 +62,13 @@
       (if (equal? 'text-field-enter (send other-thing get-event-type))
           (button-do-stuff 'irrelevant 'not-used)
           '()))
+
+    ; Create a horizontal panel to house the send button and text-field
+    (define hpanel (new horizontal-panel%
+                        [parent main-frame]
+                        [min-width 450]
+                        [min-height 10]
+                        [alignment (list 'left 'center)]))
     
     ; creates the editing area as part of the parent "main-frame" define above.
     ; initially labelled "Username:"
@@ -65,7 +76,7 @@
     ; the window dimensions to fit the new label (the actual username)
     ; TODO make label setable
     (define input (new text-field%
-                       [parent main-frame]
+                       [parent hpanel]
                        [label "username  "] 
                        [callback text-field-callback]
                        ))
@@ -111,7 +122,7 @@
           one-message)))
     ; creates the send button 
     (define send-button (new button%
-                             [parent main-frame]
+                             [parent hpanel]
                              [label "Send"]
                              [callback button-do-stuff]))
 
@@ -321,4 +332,6 @@
   (substring given-string 7))
 ;(define thing1 (make-gui))
 ;(define thing2 (make-gui))
+(define hermes-gui (make-gui))
+((hermes-gui 'show))
 
