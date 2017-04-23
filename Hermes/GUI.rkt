@@ -17,7 +17,9 @@
 
 ; store input into a message list
 ; will create closure later
+(define messages-s (make-semaphore 1))
 (define messages '())
+(define sleep-t 0.1)
 
 ; (define-values (gui-in gui-out) (make-pipe #f))
 (define (make-gui)
@@ -79,7 +81,9 @@
             (if (< 0 (string-length (send input get-value)))
               (begin 
                 ; (send-message (send input get-value) my-color);;
+                (semaphore-wait messages-s)
                 (set! messages (append messages (list (send input get-value))))
+                (semaphore-post messages-s)
                 ; (open-input-string )
                 )
                 '()))
@@ -88,6 +92,7 @@
 
     ; retrieves a message user inputed to the text field
     (define (get-message)
+      (semaphore-wait messages-s)
       (define one-message 
         (if (not (null? messages))
           (begin 
@@ -96,9 +101,16 @@
             ;(set! messages (cdr messages))
             )
           '()))
+      (semaphore-post messages-s)
+
       (if (not (string? one-message))
-        (get-message)
-        (begin (set! messages (cdr messages))
+        (begin 
+          (sleep sleep-t) ; so we don't burn cpu cycles
+          (get-message))
+        (begin
+          (semaphore-wait messages-s)
+          (set! messages (cdr messages))
+          (semaphore-post messages-s)
           one-message)))
     ; creates the send button 
     (define send-button (new button%
@@ -190,8 +202,29 @@
     (define min-v-size 30)
     (define listy (list (list "Server" "Connected" "Red" 0))) ; initializes
       ; listy with first message to be drawn on screen
+    ; wrap in closure
     (define my-color "black") ; default color of the text messages if none
                               ; specified
+    ; associated methods to prompt for color, get color and set color
+    (define (set-color new-color)
+      (set! my-color new-color))
+  
+    (define (get-my-color)
+      my-color)
+  
+    ; TODO loop to make sure you get right user input
+    ; not really needed as user can set in window
+    (define (prompt-color)
+        (define returned (get-text-from-user "Color set-up" "Please enter color for text"
+                      main-frame "black" (list 'disallow-invalid)
+                      #:validate
+                      (lambda (input)
+                        (if (and (string? input) (<= (string-length input) 10)
+                                 (>= (string-length input) 3))
+                            #t
+                            #f))))
+      (set! my-color returned)
+      returned)
     (define height 15) ; height between messages drawn on the screen
 
      ;; prompt user for username
@@ -215,6 +248,9 @@
       ; show gui should return the users the name as well as its first message
       ; to be called
       (cond ((eq? command 'show) (lambda () (send main-frame show #t)))
+            ((eq? command 'get-color) get-my-color)
+            ((eq? command 'set-color) set-color)
+            ((eq? command 'prompt-color) prompt-color)
             ((eq? command 'get-username) get-username)
             ((eq? command 'send) send-message) ;; call to show a message in a gui
             ((eq? command 'set-name) (lambda (newname) (if (string? newname)

@@ -19,6 +19,8 @@
 (define port-num 4321)
 (define sleep-t 0.1)
 
+(define hermes-gui-s (make-semaphore 1))
+
 ; we won't need this. Just me being overzealous
 (define hermes-conf (open-output-file "./hermes_client.conf" #:exists 'append))
 (define hermes-conf-s (make-semaphore 1))
@@ -95,7 +97,9 @@
   ;; read, quits when user types in "quit"
   ;; TODO read from GUI instead
   ;(define input (read-line))
+  (semaphore-wait hermes-gui-s)
   (define input ((hermes-gui 'get-message)))
+  (semaphore-post hermes-gui-s)
   ; TODO prompt for color as well
   
   ; TODO /quit instead of quit
@@ -110,7 +114,8 @@
   (displayln (string-append date-print username ": " input) out)
   (flush-output out))
 
-; sigh why you do this racket
+; a wrap around to call ((hermes-gui 'send) zzz yyy) without complaints from
+; drracket
 (define send-to-gui
   (lambda (message color)
     ((hermes-gui 'send) message color)))
@@ -127,7 +132,11 @@
          ]
         [(string? evt)
             (displayln-safe evt convs-out-s convs-out)
-            (send-to-gui evt "black")
+            ; TODO set color to current client if the message is from him
+            ; otherwise set it to the remote
+            (semaphore-wait hermes-gui-s)
+            (send-to-gui evt ((hermes-gui 'get-color)))
+            (semaphore-post hermes-gui-s)
             ] ; could time stamp here or to send message
         [else
           (displayln-safe (string-append "Nothing received from server for 2 minutes.") convs-out-s convs-out)]))
