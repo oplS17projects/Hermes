@@ -1,6 +1,6 @@
 #lang racket
 
-(require "modules/general.rkt" "Hermes_Gui1.3.rkt")
+(require "modules/general.rkt" "GUI.rkt")
 (require math/base) ;; for random number generation
 ;; TODO clean up string message output and alignment
 ;; TODO close ports after done
@@ -10,13 +10,19 @@
 ;; notes: output may need to be aligned and formatted nicely
 
 
-; we will  prompt for these in the gui
+(define hermes-gui (make-gui)) ;; our gui
+((hermes-gui 'show))
+;(sleep 0.25)
+
+
 (define host3 "localhost")
 (define port-num 4321)
 (define sleep-t 0.1)
 
+(define hermes-gui-s (make-semaphore 1))
+
 ; we won't need this. Just me being overzealous
-(define hermes-conf (open-output-file "./hermes_client.conf" #:exists'append))
+(define hermes-conf (open-output-file "./hermes_client.conf" #:exists 'append))
 (define hermes-conf-s (make-semaphore 1))
 
 (define convs-out (open-output-file "./convs_client.out" #:exists 'append))
@@ -37,8 +43,16 @@
 
     ; store username to a file for later retrieval along with relevent
     ; info used for authentication with server
-    (displayln "What's your name?")
-    (define username (read-line))
+    ; TODO 
+    ; semaphore for gui object
+    ; could display a bubble and prompt for username in GUI object
+
+    ; create a gui object
+    ; (define hermes-gui (make-gui))
+    ; ((hermes-gui 'show))
+    ;(displayln "What's your name?")
+    ;(define username (read-line))
+    (define username ((hermes-gui 'get-username)))
 
     ;send the username to the server (username in out)
     (displayln username out)
@@ -59,11 +73,14 @@
                     (sleep sleep-t)
                     (loop)))))
     (displayln-safe "Now waiting for sender thread." error-out-s error-out)
-    (thread-wait t) ;; returns prompt back to drracket
+    ; (thread-wait t) ;; returns prompt back to drracket
+    )
+
+  (lambda ()
     (displayln-safe "Closing client ports." error-out-s error-out)
-    (close-input-port in)
-    (close-output-port out))
-    (custodian-shutdown-all main-client-cust))
+    ;(close-input-port in)
+    ;(close-output-port out)
+    (custodian-shutdown-all main-client-cust)))
 
 
 ;; sends a message to the server
@@ -78,17 +95,30 @@
                                     (number->string (date-second date-today))
                                     " | "))
   ;; read, quits when user types in "quit"
-  (define input (read-line))
+  ;; TODO read from GUI instead
+  ;(define input (read-line))
+  ;(semaphore-wait hermes-gui-s)
+  (define input ((hermes-gui 'get-message)))
+  ;(semaphore-post hermes-gui-s)
+  ; TODO prompt for color as well
+  
   ; TODO /quit instead of quit
-  (cond ((string=? input "quit")
+  (cond ((string=? input "/quit")
              (displayln (string-append date-print username " signing out. See ya!") out)
              (flush-output out)
              (close-output-port error-out)
              (close-output-port convs-out)
+             ;(custodian-shutdown-all main-client-cust)
              (exit)))
   
   (displayln (string-append date-print username ": " input) out)
   (flush-output out))
+
+; a wrap around to call ((hermes-gui 'send) zzz yyy) without complaints from
+; drracket
+(define send-to-gui
+  (lambda (message color)
+    ((hermes-gui 'send) message color)))
 
 ; receives input from server and displays it to stdout
 (define (receive-messages in)
@@ -101,9 +131,18 @@
          ;(exit)
          ]
         [(string? evt)
-         (displayln-safe evt convs-out-s convs-out)] ; could time stamp here or to send message
+            (displayln-safe evt convs-out-s convs-out)
+            ; TODO set color to current client if the message is from him
+            ; otherwise set it to the remote
+            ;(semaphore-wait hermes-gui-s)
+            (send-to-gui evt ((hermes-gui 'get-color)))
+            ;(semaphore-post hermes-gui-s)
+            ] ; could time stamp here or to send message
         [else
           (displayln-safe (string-append "Nothing received from server for 2 minutes.") convs-out-s convs-out)]))
 
 (displayln-safe "Starting client." error-out-s error-out)
 (define stop-client (client 4321))
+;(define stop-client (client 4321))
+; we will  prompt for these in the gui
+
