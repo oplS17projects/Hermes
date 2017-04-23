@@ -104,7 +104,7 @@ that the server provides. For the most part the program only interacts with the 
 through the GUI.
 
 ### Ibrahim Mkusa @iskm
-I have written the networking code i.e. code that allows communication between
+I wrote the networking code i.e. code that allows communication between
 clients through server. I wrote scheduling code responsible for queueing
 fairly the client messages and broadcasting to the rest of connected
-clients. Implemented the logic for handling /list, /whisper commands.
+clients. I also implemented the logic for handling /list, /whisper commands.
