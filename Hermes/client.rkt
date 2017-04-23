@@ -100,18 +100,20 @@
   ;(semaphore-wait hermes-gui-s)
   (define input ((hermes-gui 'get-message)))
   ;(semaphore-post hermes-gui-s)
-  ; TODO prompt for color as well
   
-  ; TODO /quit instead of quit
+  ; /color color is appended to input to specify the color the message should
+  ; be displayed in
   (cond ((string=? input "/quit")
-             (displayln (string-append date-print username " signing out. See ya!") out)
+             (displayln (string-append date-print username " signing out. See ya!"
+                                       " /color " ((hermes-gui 'get-color))) out)
              (flush-output out)
              (close-output-port error-out)
              (close-output-port convs-out)
              ;(custodian-shutdown-all main-client-cust)
              (exit)))
   
-  (displayln (string-append date-print username ": " input) out)
+  (displayln (string-append date-print username ": " input
+                            " /color " ((hermes-gui 'get-color))) out)
   (flush-output out))
 
 ; a wrap around to call ((hermes-gui 'send) zzz yyy) without complaints from
@@ -132,10 +134,16 @@
          ]
         [(string? evt)
             (displayln-safe evt convs-out-s convs-out)
+            (define evt-matched
+              (regexp-match #px"(.*)\\s+/color\\s+(\\w+).*"
+                            evt))
             ; TODO set color to current client if the message is from him
             ; otherwise set it to the remote
             ;(semaphore-wait hermes-gui-s)
-            (send-to-gui evt ((hermes-gui 'get-color)))
+            ;(send-to-gui evt ((hermes-gui 'get-color)))
+            
+            ; extracts the message and color from received message
+            (send-to-gui (cadr evt-matched) (caddr evt-matched))
             ;(semaphore-post hermes-gui-s)
             ] ; could time stamp here or to send message
         [else

@@ -4,8 +4,9 @@
 (require math/base) ;; for random number generation
 
 
-(define welcome-message "Welcome to Hermes coms. Type your message below")
-(define successful-connection-m "Successfully connected to a client. Sending client a welcome message.")
+;; server messages in black
+(define welcome-message "Welcome to Hermes coms. Type your message below /color black ")
+(define successful-connection-m "Successfully connected to a client. Sending client a welcome message. /color black ")
 
 (define sleep-t 0.1)
 
@@ -133,7 +134,8 @@
     (displayln welcome-message out)
     ;; print to server log and client
     (define print-no-users (string-append "Number of users in chat: "
-                                          (number->string ((c-count 'current-count)))))
+                                          (number->string ((c-count 'current-count)))
+                                          " /color black"))
     (displayln print-no-users out)
     (displayln-safe print-no-users convs-out-s convs-out)
     (flush-output out)
@@ -212,7 +214,8 @@
                   (semaphore-wait c-count-s)
                   (semaphore-wait connections-s)
                   (define no-of-users (string-append "Number of users in chat: "
-                                          (number->string ((c-count 'current-count)))))
+                                          (number->string ((c-count 'current-count)))
+                                          " /color black"))
                   (displayln no-of-users out)
                   (flush-output out)
                   (semaphore-post connections-s)
@@ -221,10 +224,10 @@
                  [list-users
                   (semaphore-wait connections-s)
                   ; map over connections sending the username to the client
-                  (displayln "Here is a list of users in chat." out)
+                  (displayln "Here is a list of users in chat. /color black" out)
                   (map
                    (lambda (ports)
-                     (displayln (get-username ports) out))
+                     (displayln (string-append (get-username ports) " /color black") out))
                    ((c-connections 'cons-list)))
                   (flush-output out)
                   (semaphore-post connections-s)]
