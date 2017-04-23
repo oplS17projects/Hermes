@@ -92,11 +92,11 @@
   ; get current time
   (define date-today (seconds->date (current-seconds) #t))
   ;TODO pad the second if its only 1 character
-  (define date-print (string-append (number->string (date-hour date-today))
+  (define date-print (string-append (pad-date (number->string (date-hour date-today)))
                                     ":"
-                                    (number->string (date-minute date-today))
+                                    (pad-date (number->string (date-minute date-today)))
                                     ":"
-                                    (number->string (date-second date-today))
+                                    (pad-date (number->string (date-second date-today)))
                                     " | "))
   ;; read, quits when user types in "quit"
   ;; TODO read from GUI instead

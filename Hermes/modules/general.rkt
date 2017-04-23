@@ -1,6 +1,6 @@
 #lang racket
 
-(provide displayln-safe)
+(provide displayln-safe pad-date)
 ;; Several threads may want to print to stdout, so  lets make things civil
 ; constant always available
 (define stdout (make-semaphore 1))
@@ -22,3 +22,8 @@
             (displayln a-string)
             (semaphore-post stdout)])))
 
+; adds padding to dates
+(define (pad-date date-element)
+  (if (> (string-length date-element) 1)
+    date-element
+    (string-append "0" date-element)))

@@ -162,7 +162,7 @@
         (send dc draw-text input 0 height)  ;; just print message to string
 
         (set! listy (appendlist listy (list username input color height)))
-        (set! height (+ height 15))
+        (set! height (+ height 15)) ; 15 is space between messages
         ; redraw overly long text on gui
         (set! min-v-size (+ min-v-size 15))
         (if (> (* 20 (string-length input)) min-h-size)
