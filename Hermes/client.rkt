@@ -12,7 +12,7 @@
 
 (define hermes-gui (make-gui)) ;; our gui
 ((hermes-gui 'show))
-(sleep 0.25)
+;(sleep 0.25)
 
 
 (define host3 "localhost")
@@ -20,7 +20,7 @@
 (define sleep-t 0.1)
 
 ; we won't need this. Just me being overzealous
-(define hermes-conf (open-output-file "./hermes_client.conf" #:exists'append))
+(define hermes-conf (open-output-file "./hermes_client.conf" #:exists 'append))
 (define hermes-conf-s (make-semaphore 1))
 
 (define convs-out (open-output-file "./convs_client.out" #:exists 'append))
@@ -93,7 +93,8 @@
                                     " | "))
   ;; read, quits when user types in "quit"
   ;; TODO read from GUI instead
-  (define input (read-line))
+  ;(define input (read-line))
+  (define input ((hermes-gui 'get-message)))
   ; TODO /quit instead of quit
   (cond ((string=? input "quit")
              (displayln (string-append date-print username " signing out. See ya!") out)

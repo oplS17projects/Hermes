@@ -13,6 +13,11 @@
 
 (provide make-gui)
 
+; store input into a message list
+; will create closure later
+(define messages '())
+
+; (define-values (gui-in gui-out) (make-pipe #f))
 (define (make-gui)
     ;;Create the frame/window with title "Example5", width 500 and height 700
     (define main-frame (new frame%
@@ -68,11 +73,28 @@
         (if (color-change-request? (send input get-value))
             (set! my-color (get-color-from-input (send input get-value)))
             (if (< 0 (string-length (send input get-value)))
-                (send-message (send input get-value) my-color);;
+              (begin 
+                ; (send-message (send input get-value) my-color);;
+                (set! messages (append messages (list (send input get-value))))
+                ; (open-input-string )
+                )
                 '()))
         (send input set-value "")
         )
 
+    (define (get-message)
+      (define one-message 
+        (if (not (null? messages))
+          (begin 
+            ;(define msg (car messages))
+            (car messages)
+            ;(set! messages (cdr messages))
+            )
+          '()))
+      (if (not (string? one-message))
+        (get-message)
+        (begin (set! messages (cdr messages))
+          one-message)))
     ; creates the send button 
     (define send-button (new button%
                              [parent main-frame]
@@ -99,6 +121,7 @@
               (substring str start (+ start index))
               (helper str (+ index 1))))
         (helper string-i 0))
+
     
     ;; draws a user input to the screen
     (define (user-message user-input)
@@ -181,6 +204,7 @@
             ;;Something up with that
             ; else should assume a message and output to screen we do not want it
             ; to fail
+            ((eq? command 'get-message) get-message)
             (else (error "Invalid Request" command))
             ))
     ;;dispatch goes below that
