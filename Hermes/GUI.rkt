@@ -61,11 +61,13 @@
           '()))
     
     ; creates the editing area as part of the parent "main-frame" define above.
-    ; initially labelled "Username:" 
+    ; initially labelled "Username:"
+    ; NOTE: we pad label with additional spaces so we don't have to recompute
+    ; the window dimensions to fit the new label (the actual username)
     ; TODO make label setable
     (define input (new text-field%
                        [parent main-frame]
-                       [label "user"]
+                       [label "username  "] 
                        [callback text-field-callback]
                        ))
 
@@ -198,7 +200,12 @@
     (define (get-username)
             (define returned (get-text-from-user "Username set-up" "Please enter a username"
                       main-frame "user" (list 'disallow-invalid)
-                      #:validate string? ))
+                      #:validate
+                      (lambda (input)
+                        (if (and (string? input) (<= (string-length input) 10)
+                                 (>= (string-length input) 2))
+                            #t
+                            #f))))
       (send input set-label returned)
       returned)
 
