@@ -19,10 +19,14 @@ you are good to go.
 ### Clients
 
 In the clients follow the prompt to set you up. Type in messages to send to
-other clients. You can list users in chat with /list users. You can get the
-count of users with /list count. If you want to send a message to a particular
-user, do /whisper username message in chat. If you want to leave chat, type in
-/quit. As a consequence you can't use /quit alone in your messages.
+other clients.
+
+#### Commands
+* Change color of your messages with /color color. Default is black.
+* You can list users in chat with /list users. 
+* You can get the count of users with /list count. 
+* If you want to send a message to a particular user, do /whisper username message in chat.
+* If you want to leave chat, type /quit. 
 
 ### Server
 
