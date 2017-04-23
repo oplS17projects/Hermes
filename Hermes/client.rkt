@@ -129,7 +129,8 @@
   
   (cond [(eof-object? evt)
          (displayln-safe "Server connection closed." error-out-s error-out)
-         (custodian-shutdown-all main-client-cust)
+         (exit)
+         ;(custodian-shutdown-all main-client-cust)
          ;(exit)
          ]
         [(string? evt)

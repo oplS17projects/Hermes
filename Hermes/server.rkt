@@ -188,26 +188,29 @@
            (define list-count  (regexp-match #px"(.*)/list\\s+count\\s*" evt-t0)) ;; is client asking for number of logged in users
            (define list-users (regexp-match #px"(.*)/list\\s+users\\s*" evt-t0)) ;; user names
            ; do something whether it was a message, a whisper, request for number of users and so on
+
            ; TODO if user doesn't exist handle it********
            (cond [whisper
                   (semaphore-wait connections-s)
                   ; get output port for user
+                  ; this might be null
                   (define that-user-ports
-                    (first (filter
+                    (filter
                      (lambda (ports)
                        (if (string=? (whisper-to whisper) (get-username ports))
                            #t
                            #f))
-                     ((c-connections 'cons-list)))))
+                     ((c-connections 'cons-list))))
                   ; try to send that user the whisper
-                  (if (port-closed? (get-output-port that-user-ports))
+                  (if (and (null? that-user-ports)
+                           #t) ; #t is placeholder for further checks
                       (begin
-                        (displayln "User is unavailable" out)
+                        (displayln "User is unavailable. /color black" out)
                         (flush-output out))
                       (begin
                         (displayln (string-append (whisper-info whisper) (whisper-message whisper))
-                                   (get-output-port that-user-ports))
-                        (flush-output (get-output-port that-user-ports))))
+                                   (get-output-port (car that-user-ports)))
+                        (flush-output (get-output-port (car that-user-ports)))))
                   (semaphore-post connections-s)]
                  [list-count
                   ;;should put a semaphore on connections
