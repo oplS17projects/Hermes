@@ -10,6 +10,8 @@
 ;Object stuff
 ; TODO make different objects threadable send button vs text area vs canvas
 ; TODO gui is just a relay remember
+; TODO create a dialog to ask user for his username. This should be wrapped in a
+; function get-username that we can call 
 
 (provide make-gui)
 
