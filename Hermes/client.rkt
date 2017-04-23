@@ -101,6 +101,7 @@
              (flush-output out)
              (close-output-port error-out)
              (close-output-port convs-out)
+             ;(custodian-shutdown-all main-client-cust)
              (exit)))
   
   (displayln (string-append date-print username ": " input) out)

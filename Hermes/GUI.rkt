@@ -130,7 +130,9 @@
         (define color (substring user-input (+ 2 (string-length username) (string-length input))))
         (send dc set-text-foreground color) ; set dc's text color to user
                                             ; provided
-        (send dc draw-text (string-append username ":" input) 0 height)
+        ; (send dc draw-text (string-append username ":" input) 0 height)
+        (send dc draw-text input 0 height)  ;; just print message to string
+
         (set! listy (appendlist listy (list username input color height)))
         (set! height (+ height 15))
         ; redraw overly long text on gui
@@ -149,10 +151,10 @@
     
     ;; draws messages to the screen canvas as text
     (define (re-draw-message username input color in-height)
-      (begin
         (send dc set-text-foreground color)
-        (send dc draw-text (string-append username ":" input) 0 in-height)
-        ))
+        ; (send dc draw-text (string-append username ":" input) 0 in-height)
+        (send dc draw-text input 0 in-height)
+        )
 
     ; used when redrawing the screen along with its helper.
     (define (update given-list)
