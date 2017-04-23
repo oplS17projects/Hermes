@@ -37,6 +37,9 @@
 
     ; store username to a file for later retrieval along with relevent
     ; info used for authentication with server
+    ; TODO 
+    ; semaphore for gui object
+    ; could display a bubble and prompt for username in GUI object
     (displayln "What's your name?")
     (define username (read-line))
 

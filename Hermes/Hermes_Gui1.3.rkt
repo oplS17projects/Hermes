@@ -32,84 +32,108 @@
                              (get-height-from-list (car paint-listy)))
             (do-more-stuff-paint (cdr paint-listy) paint-canvas paint-dc))))
 
+    ; canvas for displaying messages with horizontal and vertical scrollbar.
+    ; on an event it calls do-stuff-paint to redraw things on the screen 
+    ; properly
     (define read-canvas (new canvas%
                              [parent main-frame]
                              [paint-callback do-stuff-paint]
                              [style '(hscroll vscroll)]
                              ))
 
+    ; "send" is rackets way of doing object-oriented programming. It calls an
+    ; objects functions in this case "read-canvas" object's init-auto-scrollbars
     (send read-canvas init-auto-scrollbars #f #f 0 0);Start with no scrollbars
-    ;;text-field stuff
-    (define (text-feild-callback callback-type other-thing)
+
+    ; editing area callback. Gets called when enter is pressed.
+    (define (text-field-callback callback-type other-thing)
       (if (equal? 'text-field-enter (send other-thing get-event-type))
           (button-do-stuff 'irrelevant 'not-used)
           '()))
     
+    ; creates the editing area as part of the parent "main-frame" define above.
+    ; initially labelled "Username:" 
+    ; TODO make label setable
     (define input (new text-field%
                        [parent main-frame]
                        [label "Username:"]
-                       [callback text-feild-callback]
+                       [callback text-field-callback]
                        ))
-    ;;button stuff
+
+    ; It's a callback function activated when the send button is pressed in the
+    ; GUI. It is also called manually when textfield receives an enter key
     (define (button-do-stuff b e);b and e do nothing :/
-      (begin
         (if (color-change-request? (send input get-value))
             (set! my-color (get-color-from-input (send input get-value)))
             (if (< 0 (string-length (send input get-value)))
                 (send-message (send input get-value) my-color);;
                 '()))
         (send input set-value "")
-        ))
+        )
+
+    ; creates the send button 
     (define send-button (new button%
                              [parent main-frame]
                              [label "Send"]
                              [callback button-do-stuff]))
-    ;;I forget what these do but don't move them
+
+    ; get-dc retrieves the canvas' device context. From racket docs. A dc object
+    ; is a drawing context for drawing graphics and text. It represents output 
+    ; devices in a generic way.
+    ; Specifically the line below retrieves our canvas device context object.
     (define dc (send read-canvas get-dc))
-    (send dc set-scale 1 1)
-    (send dc set-text-foreground "black")
+    (send dc set-scale 1 1) ; set scaling config of output display to 1 to 1
+                            ; no scalling
+    (send dc set-text-foreground "black") ; color of text that gets drawn on the
+                                          ; canvas with "draw-text"
+    ; (send dc set-smoothing 'aligned)
     ;;messaging stuff
 
-    (define (user-message-parse string start)
-      (begin
+    ; could convert below to regexes
+    (define (user-message-parse string-i start)
         (define (helper str index)
-          (if (eq? (string-ref str (+ start index)) #\~)
+          (if (eq? (string-ref str (+ start index)) #\~) ; regexes would allow us
+                                                         ; to avoid this #\~
               (substring str start (+ start index))
               (helper str (+ index 1))))
-        (helper string 0)))
+        (helper string-i 0))
     
-    (define (user-message onetrueinput)
-      (begin
-        (define username (user-message-parse onetrueinput 0))
-        (define input (user-message-parse onetrueinput  (+ 1(string-length username))))
-        (define color (substring onetrueinput (+ 2 (string-length username) (string-length input))))
-        (send dc set-text-foreground color)
+    ;; draws a user input to the screen
+    (define (user-message user-input)
+        (define username (user-message-parse user-input 0))
+        (define input (user-message-parse user-input  (+ 1 (string-length username))))
+        (define color (substring user-input (+ 2 (string-length username) (string-length input))))
+        (send dc set-text-foreground color) ; set dc's text color to user
+                                            ; provided
         (send dc draw-text (string-append username ":" input) 0 height)
         (set! listy (appendlist listy (list username input color height)))
         (set! height (+ height 15))
+        ; redraw overly long text on gui
         (set! min-v-size (+ min-v-size 15))
         (if (> (* 20 (string-length input)) min-h-size)
             (set! min-h-size (* 20 (string-length input)))
             '())
         (send read-canvas init-auto-scrollbars min-h-size min-v-size 0 1)
-        ))
-    ;;Add a function that parces input from a string and extracts elements
+        )
+    ;;Add a function that parces input from a string-i and extracts elements
 
-    ;;This probably won't change...
+    ; actually gets called to send input to the screen. user-message is in effect
+    ; its helper. It uses "~" to delimit the different components of message
     (define (send-message input color)
       (user-message (string-append name "~" input "~" color)))
-    ;;Although re-draw is kind of misleading, it is just print the whole
-    ;;list of strings to the screen
+    
+    ;; draws messages to the screen canvas as text
     (define (re-draw-message username input color in-height)
       (begin
         (send dc set-text-foreground color)
         (send dc draw-text (string-append username ":" input) 0 in-height)
         ))
 
+    ; used when redrawing the screen along with its helper.
     (define (update given-list)
-      (begin (set! listy '())
-             (set! height 0)
-             (update-helper given-list)))
+      (set! listy '())
+      (set! height 0)
+      (update-helper given-list))
 
     (define (update-helper given-list)
       (if (null? given-list)
@@ -126,9 +150,12 @@
     (define name "Me")
     (define min-h-size 80)
     (define min-v-size 30)
-    (define listy (list (list "Server" "Connected" "Red" 0)))
-    (define my-color "black")
-    (define height 15)
+    (define listy (list (list "Server" "Connected" "Red" 0))) ; initializes
+      ; listy with first message to be drawn on screen
+    (define my-color "black") ; default color of the text messages if none
+                              ; specified
+    (define height 15) ; height between messages drawn on the screen
+
     ;;dispatch goes below that
     (define (dispatch command)
       (cond ((eq? command 'show) (send main-frame show #t))
@@ -160,7 +187,9 @@
 ;the username the message they said and the color they used
 ;The the height the message should display at
 
-
+; listoflist is listy here, and add-to-end is what gets appended to the end
+; really expensive operation but its important for Doug to showcase some opl
+; concepts
 (define (appendlist listoflist add-to-end)
   (if (null? listoflist)
       (cons add-to-end '())
@@ -180,7 +209,7 @@
 
 
 
-;this one is a crap version of justpressing the enter key
+; did user request for color change /
 (define (color-change-request? given-string)
   (if (> (string-length given-string) 7)
       (if (equal? (substring given-string 0 6) "/color")
@@ -188,6 +217,7 @@
           #f)
       #f))
 
+; we should use regexes for this.
 (define (get-color-from-input given-string)
   (substring given-string 7))
 ;(define thing1 (make-gui))
