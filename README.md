@@ -2,22 +2,20 @@
 
 ### Statement
 Hermes is a multi-client chat program akin to IRC written in  Racket. Building
-Hermes is interesting as it exposes us to various design problems namely networking,
-synchronization, scheduling, and GUI design.
+Hermes was interesting as it exposed us to various design problems namely networking,
+synchronization, scheduling, GUI design, and component design.
 
 ### Analysis
 > Will you use data abstraction? How?
 
-TCP communication will be abstracted away, so that we deal with Hermes
+TCP communication has been abstracted away, so that we deal with Hermes
 definition of a message.
-We will try to encrypt the messages passed around. The encryption will be
-abstracted away, so we only have to think about it once during implementation.
 
 > Will you use recursion? How?
 
-The  server will continually loop waiting for connections from clients.
-The GUI will continually loop to handle input from the user, and to and fro
-the server.
+The  server continually loops waiting for connections from clients.
+The GUI continually loops to handle input from the user, 
+as well as to keep the canvas it writes the messages on updated.
 
 > Will you use map/filter/reduce? How?
 
@@ -26,8 +24,10 @@ of open ports to send messages.
 
 > Will you use object-orientation? How?
 
-Keeping count of the number of clients will require an object of some sort.
-With procedures to increment and decrement the number of users.
+Keeping count of the number of clients required working with objects that are able to
+increment and decrement the number of users.
+We also keep the GUI in an object so the many moving parts of the
+user interface are packaged in one place.
 
 > Will you use functional approaches to processing your data? How?
 
@@ -40,20 +40,20 @@ variables.
 
 State-modification will be used e.g. keeping count of logged in users requires
 state modification via set! to maintain the true user account.
+The user interface also needs a few states that it needs to keep up to date.
 
 > Will you build an expression evaluator, like we did in the symbolic differentatior and the metacircular evaluator?
 
-Users will type their input into a text field from the GUI. We will retrieve
-the command and evaluate it to see if its a message, or a command to change
-GUI state. We will do something that resembles the metacircular evaluator.
-
+We allow the use of a few commands through the user interface. The most notable ones
+are the /quit command to shut down a connection and the /color command to allow
+the user to change the color of their text.
 
 ### Deliverable and Demonstration
 There are two big deliverables for this project. Code for the server
 , and the clients which not only has code for interacting with Hermes,
 but also a GUI for interactivity with a user. 
 
-We plan to demonstrate Hermes by running the server code on a remote machine.
+We will demonstrate Hermes by running the server code on a remote machine.
 We will connect to the server via our PCs running client code. We will ssh into
 the remote machine to see the server running. Since Hermes is a multichat anyone
 can join in the demonstration by connecting their computers to the remote
@@ -80,11 +80,11 @@ satisfactorily we would have met our goals.
 
 
 ## Schedule
-The first step in our project will be to setup a system to get data from one machine to another. What data exactly isn't directly important and the other machine doesn't really need to display it in a pretty manner, it just needs to relay that it has recieved the correct information.
+The first step in our project was to setup a system to get data from one machine to another. What data exactly wasn't directly important and the other machine didn't really need to display it in a pretty manner, it just needed to relay that it has recieved the correct information.
 
-Next we need to create a user interface that looks nice. Some way to control the connection and display information in a convient and readable format.
+Next we needed to create a user interface that looked nice. Some way to control the connection and display information in a convient and readable format.
 
-After we have finished the user interface and connecting the machines, we will need to merge them together and begin expanding the utility if time permits.
+After we finished the user interface and connecting the machines, we needed to merge them together and begin expanding the utility if time permits.
 
 ### First Milestone (Sun Apr 9)
 Get two different machines to relay information meaningfully.
@@ -92,17 +92,16 @@ Get two different machines to relay information meaningfully.
 ### Second Milestone (Sun Apr 16)
 Get a GUI that looks professional and uses the correct format.
 
-### Public Presentation (Mon Apr 24, Wed Apr 26, or Fri Apr 28 [your date to be determined later])
+### Public Presentation (Mon Apr 24)
 Merging the GUI and information relay together into one program. If time permits we also plan on adding additional features.
 
 ## Group Responsibilities
 
 ### Douglas Richardson @Doug-Richardson
-Will write the GUI code. This should allow the user to access different
-aspects of our program in a clean easy to use interface. Most of
-how the program responds to user input will be filtered through the gui.
-If time permits I will also be writing code to encrypt and decrypt the information
-going from the server to the clients. 
+I have written the code for the GUI. 
+It presents the user with a simple readable format for displaying the information
+that the server provides. For the most part the program only interacts with the user
+through the GUI.
 
 ### Ibrahim Mkusa @iskm
 Will write the networking code i.e. code that allows communication between
