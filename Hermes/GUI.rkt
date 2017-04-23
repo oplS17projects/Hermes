@@ -84,6 +84,7 @@
         (send input set-value "")
         )
 
+    ; retrieves a message user inputed to the text field
     (define (get-message)
       (define one-message 
         (if (not (null? messages))
@@ -191,13 +192,20 @@
                               ; specified
     (define height 15) ; height between messages drawn on the screen
 
+     ;; prompt user for username
+    ;; could randomly assign a user
+    (define (get-username)
+            (get-text-from-user "Username set-up" "Please enter a username"
+                      main-frame "user" (list 'disallow-invalid)
+                      #:validate string? ))
+
     ;;dispatch goes below that
     ;; TODO get username function maybe
     (define (dispatch command)
       ; show gui should return the users the name as well as its first message
       ; to be called
       (cond ((eq? command 'show) (lambda () (send main-frame show #t)))
-            ((eq? command 'gui-input-port))
+            ((eq? command 'get-username) get-username)
             ((eq? command 'send) send-message) ;; call to show a message in a gui
             ((eq? command 'set-name) (lambda (newname) (if (string? newname)
                                                   (set! name newname)
@@ -216,6 +224,7 @@
 
 
 ;This one displays information
+
 
 
 

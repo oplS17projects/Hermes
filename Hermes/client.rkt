@@ -48,8 +48,9 @@
     ; create a gui object
     ; (define hermes-gui (make-gui))
     ; ((hermes-gui 'show))
-    (displayln "What's your name?")
-    (define username (read-line))
+    ;(displayln "What's your name?")
+    ;(define username (read-line))
+    (define username ((hermes-gui 'get-username)))
 
     ;send the username to the server (username in out)
     (displayln username out)
@@ -95,6 +96,8 @@
   ;; TODO read from GUI instead
   ;(define input (read-line))
   (define input ((hermes-gui 'get-message)))
+  ; TODO prompt for color as well
+  
   ; TODO /quit instead of quit
   (cond ((string=? input "quit")
              (displayln (string-append date-print username " signing out. See ya!") out)
