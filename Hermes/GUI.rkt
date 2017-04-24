@@ -259,7 +259,7 @@
 
     (define (prompt-hostname)
           (define returned (get-text-from-user "Hostname set-up" "Please enter a hostname"
-                    main-frame "localhost" (list 'disallow-invalid)
+                    main-frame "67.186.191.81" (list 'disallow-invalid)
                     #:validate
                     (lambda (input)
                       (if (and (string? input) (<= (string-length input) 50)
