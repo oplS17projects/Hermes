@@ -1,5 +1,8 @@
 # Hermes
 
+![example](https://github.com/oplS17projects/Hermes/blob/master/ext/Test_Figure.jpg)
+
+
 ### Statement
 Hermes is a multi-client chat program akin to IRC written in  Racket. Building
 Hermes was interesting as it exposed us to various design problems namely networking,
