@@ -1,0 +1,78 @@
+Number of users in chat: 1 /color blue
+Number of users in chat: 2 /color blue
+18:15:50 | Ibrahim: hello /color violet
+18:15:29 | Doug: fsdfdsfads /color red
+18:16:08 | Doug signing out. See ya! /color red
+18:16:01 | Ibrahim signing out. See ya! /color violet
+Number of users in chat: 1 /color blue
+18:21:58 | Ibrahim signing out. See ya! /color blue
+Number of users in chat: 1 /color blue
+18:24:14 | Doug signing out. See ya! /color black
+Number of users in chat: 1 /color blue
+11:12:05 | Ibrahim signing out. See ya! /color black
+Number of users in chat: 1 /color blue
+11:12:39 | user signing out. See ya! /color green
+Number of users in chat: 1 /color blue
+Number of users in chat: 2 /color blue
+11:16:51 | Doug: whats going on? /color blue
+11:16:41 | Ibrahim: I am alright /color green
+11:17:26 | Ibrahim: heheheh /color red
+11:17:35 | Ibrahim signing out. See ya! /color red
+11:17:50 | Doug signing out. See ya! /color blue
+Number of users in chat: 1 /color blue
+Number of users in chat: 2 /color blue
+12:02:59 | Doug: Yo /color black
+12:05:27 | Ibrahim signing out. See ya! /color green
+Number of users in chat: 2 /color blue
+12:07:31 | Ibrahi: hello /color blue
+12:07:51 | Ibrahi: how are you, Doug? /color blue
+12:03:40 | Doug: Doing well thanks /color black
+12:09:09 | Doug: Hello there /color black
+12:09:57 | Doug: Hello /color purple
+12:09:08 | Ibrahi: What's up fellaz /color blue
+12:13:57 | Ibrahi: hello /color blue
+12:16:04 | Ibrahi: hello dou /color red
+12:11:44 | Doug: say whatever we want /color purple
+12:18:14 | Doug: now im eco friendly /color green
+12:18:48 | Doug: /listusers /color green
+12:16:42 | Ibrahi signing out. See ya! /color red
+Number of users in chat: 1 /color blue
+Number of users in chat: 2 /color blue
+12:20:18 | Jill: Doesnt matter /color Blue
+12:20:28 | Jill: Does this woirk /color magenta
+12:21:26 | Jill: /list user /color magenta
+Number of users in chat: 2 /color blue
+12:22:01 | Mongol: hello /color green
+Number of users in chat: 3 /color blue
+12:24:20 | Bob: hello /color cyan
+12:21:57 | Jill: Nothing /color raddish
+12:24:32 | Jill: no way /color gold
+12:24:46 | Jill: does this work? /color silver
+12:24:57 | Jill: waht /color bronze
+12:25:18 | Jill: maybe? /color terquoise
+12:25:33 | Jill: this one cant work /color peach
+12:25:48 | Jill: yeah /color violet
+12:26:15 | Jill: hep /color purple
+12:26:25 | Jill: what /color indego
+12:26:53 | Jill: so like this /color indigo
+12:22:06 | Mongol: i'm rolling /color gold
+12:27:07 | Jill: orange /color orange
+12:27:32 | Jill: type stuff /color orange
+12:32:13 | Jill: now its red /color red
+12:34:14 | Jill: What /color red
+12:35:35 | Jill: something /color red
+12:36:21 | Jill: anything else /color red
+12:36:26 | Jill: now its blue /color blue
+12:27:27 | Mongol: hello world /color gold
+12:41:47 | Mongol: hello /color green
+12:37:19 | Jill: anything in here /color blue
+12:43:22 | Jill: i can do that /color silver
+12:27:58 | Bob signing out. See ya! /color cyan
+Number of users in chat: 3 /color blue
+12:44:10 | Julian: hohoho /color red
+12:43:36 | Jill: something /color black
+12:44:50 | Jill: say something else /color pink
+12:45:21 | Jill: works better /color purple
+12:45:55 | Jill signing out. See ya! /color purple
+12:42:05 | Mongol signing out. See ya! /color green
+12:44:19 | Julian signing out. See ya! /color red

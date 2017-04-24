@@ -157,7 +157,7 @@
               (displayln-safe (string-append
                                 "Started a thread to kill hanging "
                                 "connecting threads"))
-              (sleep 1360)
+              (sleep 7200) ; kills clients threads after a while could refresh this on new message
               (custodian-shutdown-all cust)))))
 
 ; whisper selector for the username and message

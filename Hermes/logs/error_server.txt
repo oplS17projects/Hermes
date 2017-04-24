@@ -1,0 +1,28 @@
+Starting up the listener.
+Listener successfully started.
+Server process started.
+Connection closed. EOF received
+Connection closed. EOF received
+Connection closed. EOF received
+Connection closed. EOF received
+Goodbye, shutting down all services
+Starting up the listener.
+Listener successfully started.
+Server process started.
+Connection closed. EOF received
+Connection closed. EOF received
+Goodbye, shutting down all services
+Starting up the listener.
+Listener successfully started.
+Server process started.
+Connection closed. EOF received
+Connection closed. EOF received
+Connection closed. EOF received
+Connection closed. EOF received
+Connection closed. EOF received
+Connection closed. EOF received
+Connection closed. EOF received
+Connection closed. EOF received
+Connection closed. EOF received
+Connection closed. EOF received
+Goodbye, shutting down all services
