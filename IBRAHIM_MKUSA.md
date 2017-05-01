@@ -1,36 +1,39 @@
-# Interface to Google Drive in Racket
+# Hermes - A chat server and client written in Racket
 
-## Fred Martin
-### April 22, 2017
+## Ibrahim Mkusa
+### April 30, 2017
 
 # Overview
-This set of code provides an interface to searching through one's Google Drive account. 
-Its most important feature is that it provides a *folder-delimited search*.
+Hermes is a chat server and client written in Racket. One can run the Hermes
+server on any machine that is internet accessible. The Hermes clients then
+connect to the server from anywhere on the internet. It's inspired by chat
+systems and clients like irc.
 
-The essential model of files in Google Drive is that they are in one big “pile.” So you can't directly find a file in a
-given folder.
+The goal in building Hermes was to expose myself to several concepts integral to
+systems like networking, synchronization, and multitasking.
 
-This code recursively collects all folders found within a given folder, and then 
-construct a search query that includes a list of all the subfolders (flattened into a single list).
-
-This then allows you to perform a folder-delimited search.
 
 **Authorship note:** All of the code described here was written by myself.
 
 # Libraries Used
-The code uses four libraries:
+Most libraries and utilities used are part of base Drracket installation and
+therefore do not need to be imported.
+
+The date and time modules were used for various time related queries.
+The tcp module was used for communication via Transmission Control Protocol.
+Concurrency and synchronization modules that provide threads, and semaphores
+were also used.
+
+Below are libraries that were not part of base system:
 
 ```
-(require net/url)
-(require (planet ryanc/webapi:1:=1/oauth2))
-(require json)
-(require net/uri-codec)
+(require racket/gui/base)
+(require math/base)
 ```
 
-* The ```net/url``` library provides the ability to make REST-style https queries to the Google Drive API.
-* Ryan Culpepper's ```webapi``` library is used to provide the ```oauth2``` interface required for authentication.
-* The ```json``` library is used to parse the replies from the Google Drive API.
-* The ```net/uri-codec``` library is used to format parameters provided in API calls into an ASCII encoding used by Google Drive.
+* The ```racket/gui/base``` library used to build graphical user interface.
+* The ```math/base``` library was used for testing purposes. It was used to
+generated random numbers.
 
 # Key Code Excerpts
 
@@ -39,116 +42,187 @@ UMass Lowell's COMP.3010 Organization of Programming languages course.
 
 Five examples are shown and they are individually numbered. 
 
-## 1. Initialization using a Global Object
+## 1. Tracking client connections using an object and closures.
 
-The following code creates a global object, ```drive-client``` that is used in each of the subsequent API calls:
+The following code defines and creates a global object, ```make-connections```
+that abstracts client connections. It also creates a semaphore to control access
+to ```make-connections``` object.
 
 ```
-(define drive-client
-  (oauth2-client
-   #:id "548798434144-6s8abp8aiqh99bthfptv1cc4qotlllj6.apps.googleusercontent.com"
-   #:secret "<email me for secret if you want to use my API>"))
+(define (make-connections connections)
+  (define (null-cons?)
+    (null? connections))
+   (define (add username in out)
+    (set! connections (append connections (list (list username in out))))
+    connections)
+   (define (cons-list)
+     connections)
+   (define (remove-ports in out)
+     (set! connections
+       (filter 
+         (lambda (ports)
+           (if (and (eq? in (get-input-port ports))
+                    (eq? out (get-output-port ports)))
+             #f
+             #t))
+         connections)))
+   (define (dispatch m)
+     (cond [(eq? m 'null-cons) null-cons?]
+           [(eq? m 'cons-list) cons-list]
+           [(eq? m 'remove-ports) remove-ports]
+           [(eq? m 'add) add]))
+   dispatch)
+
+(define c-connections (make-connections '()))
+
+(define connections-s (make-semaphore 1)) ;; control access to connections
  ```
+ When the tcp-listener accepts a connection from a client, the associated input
+ output ports along with username  are added as an entry in ```make-connections``` via ```add``` function.
+ External functions can operate on the connections by securing the semaphore,
+ and then calling ```cons-list``` to expose the underlying list of connections.
+ ```remove-ports``` method is also available to remove input output ports from
+ managed connections.
+
+
  
- While using global objects is not a central theme in the course, it's necessary to show this code to understand
- the later examples.
  
-## 2. Selectors and Predicates using Procedural Abstraction
+## 2. Tracking received messages via objects and closures.
 
-A set of procedures was created to operate on the core ```drive-file``` object. Drive-files may be either
-actual file objects or folder objects. In Racket, they are represented as a hash table.
-
-```folder?``` accepts a ```drive-file```, inspects its ```mimeType```, and returns ```#t``` or ```#f```:
-
-```
-(define (folder? drive-file)
-  (string=? (hash-ref drive-file 'mimeType "nope") "application/vnd.google-apps.folder"))
-```
-
-Another object produced by the Google Drive API is a list of drive-file objects ("```drive#fileList```"). 
-When converted by the JSON library,
-this list appears as hash map. 
-
-```get-files``` retrieves a list of the files themselves, and ```get-id``` retrieves the unique ID
-associated with a ```drive#fileList``` object:
+The code below manages broadcast messages from one client to the rest. It wraps
+a list of strings inside an object that has functions similar to ```make-connections``` for
+exposing and manipulating the list from external functions. The code creates
+```make-messages``` global object and a semaphore to control access to it from
+various threads of execution.
 
 ```
-(define (get-files obj)
-  (hash-ref obj 'files))
+(define (make-messages messages)
+  (define (add message)
+    (set! messages (append messages (list message)))
+    messages)
+  (define (mes-list)
+    messages)
+  (define (remove-top)
+    (set! messages (rest messages))
+    messages)
+  (define (dispatch m)
+    (cond [(eq? m 'add) add]
+          [(eq? m 'mes-list) mes-list]
+          [(eq? m 'remove-top) remove-top]))
+  dispatch)
 
-(define (get-id obj)
-  (hash-ref obj 'id))
-```
-## 3. Using Recursion to Accumulate Results
+(define c-messages (make-messages '()))
 
-The low-level routine for interacting with Google Drive is named ```list-children```. This accepts an ID of a 
-folder object, and optionally, a token for which page of results to produce.
-
-A lot of the work here has to do with pagination. Because it's a web interface, one can only obtain a page of
-results at a time. So it's necessary to step through each page. When a page is returned, it includes a token
-for getting the next page. The ```list-children``` just gets one page:
-
-```
-(define (list-children folder-id . next-page-token)
-  (read-json
-   (get-pure-port
-    (string->url (string-append "https://www.googleapis.com/drive/v3/files?"
-                                "q='" folder-id "'+in+parents"
-                                "&key=" (send drive-client get-id)
-                                (if (= 1 (length next-page-token))
-                                    (string-append "&pageToken=" (car next-page-token))
-                                    "")
-;                                "&pageSize=5"
-                                ))
-    token)))
-```
-The interesting routine is ```list-all-children```. This routine is directly invoked by the user.
-It optionally accepts a page token; when it's used at top level this parameter will be null.
-
-The routine uses ```let*``` to retrieve one page of results (using the above ```list-children``` procedure)
-and also possibly obtain a token for the next page.
-
-If there is a need to get more pages, the routine uses ```append``` to pre-pend the current results with 
-a recursive call to get the next page (and possibly more pages).
-
-Ultimately, when there are no more pages to be had, the routine terminates and returns the current page. 
-
-This then generates a recursive process from the recursive definition.
-
-```
-(define (list-all-children folder-id . next-page-token)
-  (let* ((this-page (if (= 0 (length next-page-token))
-                      (list-children folder-id)
-                      (list-children folder-id (car next-page-token))))
-         (page-token (hash-ref this-page 'nextPageToken #f)))
-    (if page-token
-        (append (get-files this-page)
-              (list-all-children folder-id page-token))
-        (get-files this-page))))
+(define messages-s (make-semaphore 1))  ;; control access to messages
 ```
 
-## 4. Filtering a List of File Objects for Only Those of Folder Type
+## 3. Using map to broadcast messages from client to clients
 
-The ```list-all-children``` procedure creates a list of all objects contained within a given folder.
-These objects include the files themselves and other folders.
-
-The ```filter``` abstraction is then used with the ```folder?``` predicate to make a list of subfolders
-contained in a given folder:
-
-```
-(define (list-folders folder-id)
-  (filter folder? (list-all-children folder-id)))
-```
-
-## 5. Recursive Descent on a Folder Hierarchy
-
-These procedures are used together in ```list-all-folders```, which accepts a folder ID and recursively
-obtains the folders at the current level and then recursively calls itself to descend completely into the folder
-hierarchy.
-
-```map``` and ```flatten``` are used to accomplish the recursive descent:
+The ```broadcast``` function is called repeatedly in a loop to extract a message
+from ```make-messages``` object, and send it to every other client. It uses the
+```make-connections``` objects to extract output port of a client. The ```map```
+routine is called on every client in the connections object to send it
+a message.
 
 ```
+(define broadcast
+  (lambda ()
+    (semaphore-wait messages-s)
+    (cond [(not (null? ((c-messages 'mes-list))))
+        (map
+            (lambda (ports)
+              (if (not (port-closed? (get-output-port ports)))
+                (begin 
+                    (displayln (first ((c-messages 'mes-list))) (get-output-port ports))
+                    (flush-output (get-output-port ports)))
+                (displayln-safe "Failed to broadcast. Port not open." error-out-s error-out)))
+            ((c-connections 'cons-list)))
+        (displayln-safe (first ((c-messages 'mes-list))) convs-out-s convs-out)
+        ;; remove top message from "queue" after broadcasting
+        ((c-messages 'remove-top))
+        ; debugging displayln below
+        ; (displayln "Message broadcasted")
+        ]) ; end of cond
+    (semaphore-post messages-s)))
+```
+After the message is send, the message is removed from the "queue" via the
+```remove-top```.
+
+The code snippet below creates a thread that iteratively calls ```broadcast```
+every interval, where interval(in secs) is defined by ```sleep-t```.
+
+** note ** : ```sleep``` is very important for making Hermes behave gracefully
+in a system. Without it, it would be called at the rate derived from cpu clock
+rate. This raises cpu temperatures substantially, and make cause a pre-mature
+system shutdown.
+
+```
+(thread (lambda ()
+              (displayln-safe "Broadcast thread started!")
+              (let loopb []
+                (sleep sleep-t)  ;; wait 0.2 ~ 0.5 secs before beginning to broadcast
+                (broadcast)
+                (loopb))))
+```
+
+## 4. Filtering a List of connections to find recipient of a whisper
+
+I implemented a whisper functionality, where a user can whisper to any user in
+the chat room. The whisper message is only sent to specified user. To implement
+this i used ```filter``` over the connections, where the predicate tested whether the
+current list item matched that of a specific user.
+
+'''
+(define whisper (regexp-match #px"(.*)/whisper\\s+(\\w+)\\s+(.*)" evt-t0))
+
+[whisper
+                  (semaphore-wait connections-s)
+                  ; get output port for user
+                  ; this might be null
+                  (define that-user-ports
+                    (filter
+                     (lambda (ports)
+                       (if (string=? (whisper-to whisper) (get-username ports))
+                           #t
+                           #f))
+                     ((c-connections 'cons-list))))
+                  ; try to send that user the whisper
+                  (if (and (null? that-user-ports)
+                           #t) ; #t is placeholder for further checks
+                      (begin
+                        (displayln "User is unavailable. /color blue" out)
+                        (flush-output out))
+                      (begin
+                        (displayln (string-append "(whisper) "
+                                    (whisper-info whisper) (whisper-message whisper))
+                                   (get-output-port (car that-user-ports)))
+                        (flush-output (get-output-port (car that-user-ports)))))
+                  (semaphore-post connections-s)]
+'''
+
+The snippet above is part of cond statement that tests contents of input from
+clients to determine what the client is trying wants/trying to do. The top-line
+is using regexes to determine whether the received message is a whisper or not.
+
+
+
+## 5. Selectors for dealing with content of a whisper from clients
+
+Below are are three selectors that help abstract the contents of a whisper
+message.
+
+
+
+```
+; whisper selector for the username and message
+(define (whisper-info exp)
+  (cadr exp))
+
+(define (whisper-to exp)
+  (caddr exp))
+
+(define (whisper-message exp)
+  (cadddr exp))
 (define (list-all-folders folder-id)
   (let ((this-level (list-folders folder-id)))
     (begin
@@ -156,3 +230,7 @@ hierarchy.
       (append this-level
               (flatten (map list-all-folders (map get-id this-level)))))))
 ```
+
+```whisper-info``` retrieves the date-time and username info.
+```whisper-to``` retrieves the username of the intented recipient of a whisper.
+```whisper-message``` retrieves the actual whisper.
