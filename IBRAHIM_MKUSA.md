@@ -13,8 +13,6 @@ The goal in building Hermes was to expose myself to several concepts integral to
 systems like networking, synchronization, and multitasking.
 
 
-**Authorship note:** All of the code described here was written by myself.
-
 # Libraries Used
 Most libraries and utilities used are part of base Drracket installation and
 therefore do not need to be imported.
@@ -77,6 +75,7 @@ to ```make-connections``` object.
 
 (define connections-s (make-semaphore 1)) ;; control access to connections
  ```
+
  When the tcp-listener accepts a connection from a client, the associated input
  output ports along with username  are added as an entry in ```make-connections``` via ```add``` function.
  External functions can operate on the connections by securing the semaphore,
@@ -151,7 +150,7 @@ After the message is send, the message is removed from the "queue" via the
 The code snippet below creates a thread that iteratively calls ```broadcast```
 every interval, where interval(in secs) is defined by ```sleep-t```.
 
-** note ** : ```sleep``` is very important for making Hermes behave gracefully
+```sleep``` is very important for making Hermes behave gracefully
 in a system. Without it, it would be called at the rate derived from cpu clock
 rate. This raises cpu temperatures substantially, and make cause a pre-mature
 system shutdown.
@@ -172,7 +171,7 @@ the chat room. The whisper message is only sent to specified user. To implement
 this i used ```filter``` over the connections, where the predicate tested whether the
 current list item matched that of a specific user.
 
-'''
+```
 (define whisper (regexp-match #px"(.*)/whisper\\s+(\\w+)\\s+(.*)" evt-t0))
 
 [whisper
@@ -198,7 +197,7 @@ current list item matched that of a specific user.
                                    (get-output-port (car that-user-ports)))
                         (flush-output (get-output-port (car that-user-ports)))))
                   (semaphore-post connections-s)]
-'''
+```
 
 The snippet above is part of cond statement that tests contents of input from
 clients to determine what the client is trying wants/trying to do. The top-line
@@ -211,10 +210,7 @@ is using regexes to determine whether the received message is a whisper or not.
 Below are are three selectors that help abstract the contents of a whisper
 message.
 
-
-
 ```
-; whisper selector for the username and message
 (define (whisper-info exp)
   (cadr exp))
 
@@ -223,12 +219,6 @@ message.
 
 (define (whisper-message exp)
   (cadddr exp))
-(define (list-all-folders folder-id)
-  (let ((this-level (list-folders folder-id)))
-    (begin
-      (display (length this-level)) (display "... ")
-      (append this-level
-              (flatten (map list-all-folders (map get-id this-level)))))))
 ```
 
 ```whisper-info``` retrieves the date-time and username info.
