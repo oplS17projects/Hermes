@@ -1,6 +1,6 @@
 # Hermes
 
-![example](https://github.com/oplS17projects/Hermes/blob/master/ext/Test_Figure.jpg)
+![example](https://github.com/oplS17projects/Hermes/blob/master/ext/Test_Figure.png)
 
 
 ### Statement
