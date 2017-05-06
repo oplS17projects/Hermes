@@ -56,7 +56,8 @@ This line of code allows us to wrap the gui into an object.
             (else (error "Invalid Request" command))
             ))
     ;;dispatch goes below that
-    dispatch)```
+    dispatch)
+```
 
 This allows us to make our code simpler and lets us treat the gui like an object in it's self.
 Giving the gui commands to change it's self rather than having to remember all the commands it has.
@@ -69,7 +70,8 @@ This code is code that allows us to append a new message onto the end of the lis
 (define (appendlist listoflist add-to-end)
   (if (null? listoflist)
       (cons add-to-end '())
-      (cons (car listoflist) (appendlist (cdr listoflist) add-to-end))))```
+      (cons (car listoflist) (appendlist (cdr listoflist) add-to-end))))
+ ```
       
 Normally there is a function to just append onto the end of a list, however the problem is that if we attempt to append
 a list of elements onto the end of a list, it just appends the elements onto the end of the list. For example if I had
@@ -95,7 +97,8 @@ The following procedure is used to re-draw messages onto the canvas after a scre
                       (get-username-from-list (car given-list))
                       (get-message-from-list (car given-list))
                       (get-color-from-list (car given-list)))
-                     (update-helper (cdr given-list))))))```
+                     (update-helper (cdr given-list))))))
+```
 
 While it doesn't actually use the map function, this is a map as for every element of a list (each element is a list of three strings)
 it runs a procedure (or in this case a set of procedures) in the order of the list.
@@ -111,7 +114,8 @@ This line of code is used to parse a single string message into a three string m
                                                          ; to avoid this #\~
               (substring str start (+ start index))
               (helper str (+ index 1))))
-        (helper string-i 0))```
+        (helper string-i 0))
+```
 
 This was used to parse a string into smaller strings. In hermes we can only send one string to each client at one time, therefore
 the three elements that the gui uses to print messages need to be compressed together. We append a ~ inbetween each of these so we can
@@ -135,7 +139,8 @@ it is similar to the symbolic differentaitor.
       (if (equal? (substring given-string 0 6) "/color")
           #t
           #f)
-      #f))```
+      #f))
+```
 
 The procedure button-do-stuff is run every time the user presses the return key or presses the send button on the gui
 and what it will do is check to see if the user typed in "/color", and if they did it sets the internal color to be 
